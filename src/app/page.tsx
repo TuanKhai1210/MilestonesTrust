@@ -1,93 +1,653 @@
 'use client';
-import { useCallback, useEffect, useMemo, useState } from 'react';
-import { TideCloakProvider, useTideCloak } from '@tidecloak/nextjs';
-import { ArrowDownLeft, ArrowRight, Check, CheckCheck, ChevronDown, Clock3, Droplets, ExternalLink, FileCheck2, Fingerprint, Flag, HeartHandshake, LayoutDashboard, LockKeyhole, LogOut, RefreshCw, ShieldCheck, Users, Wallet, X } from 'lucide-react';
 
-type Auth = { mode: 'demo'|'tidecloak'; configured: boolean; clientConfig: Record<string, unknown>|null; consoleUrl: string|null };
-type Actor = { sub: string; name: string; roles: string[] };
-type Milestone = { id: string; seq: number; title: string; amount: number; status: string; evidence: string|null };
-type Funding = { id: string; milestone_id: string; amount: number; recipient: string; purpose: string; version: number; hash: string; status: string };
-type State = { auth: Auth; actor: Actor|null; milestones: Milestone[]; requests: Funding[]; approvals: {request_id:string;role:string}[]; payments:{id:string;request_id:string;amount:number}[];audit:{id:number;event:string;detail:string;created_at:string}[] };
-const money = (amount:number) => new Intl.NumberFormat('en-US').format(amount);
-const labels: Record<string,string> = { LOCKED:'Locked', ELIGIBLE:'Open for funding', REQUESTED:'Awaiting approvals', APPROVED:'Ready to release', DISBURSED:'Evidence needed', VERIFIED:'Verified' };
-const names:Record<string,string> = { team:'Project team', sponsor:'Sponsor', auditor:'Independent auditor', admin:'Platform admin' };
+import React, { useEffect, useState, useCallback } from 'react';
+import { CheckCircle2, AlertOctagon, X } from 'lucide-react';
 
-export default function App() {
-  const [auth,setAuth]=useState<Auth|null>(null); const [error,setError]=useState('');
-  useEffect(()=>{fetch('/api/state').then(async r=>{const x=await r.json();if(!r.ok)throw Error(x.error);setAuth(x.auth);}).catch(e=>setError(e.message));},[]);
-  if(error)return <div className="boot"><Droplets size={36}/><h1>Unable to open the workspace</h1><p>{error}</p><button onClick={()=>location.reload()}>Try again</button></div>;
-  if(!auth)return <div className="boot"><Droplets size={36}/><p>Opening MilestoneTrust…</p></div>;
-  if(auth.mode==='tidecloak' && auth.configured && auth.clientConfig)return <TideCloakProvider config={auth.clientConfig}><Connected auth={auth}/></TideCloakProvider>;
-  return <Workspace auth={auth}/>;
+// --- SỬA TOÀN BỘ BLOCK NÀY: DÙNG ../ THAY VÌ @/ ---
+import Navbar from '../components/Navbar';
+import PublicDashboard from '../components/PublicDashboard';
+import ProjectWorkspace from '../components/ProjectWorkspace';
+import ApprovalCenter from '../components/ApprovalCenter';
+import SecurityGovernance from '../components/SecurityGovernance';
+import AuditTrail from '../components/AuditTrail';
+import { AuthenticatedUser, CampaignState } from '../types/frontend';
+// ---------------------------------------------------
+const FALLBACK_IDENTITIES: AuthenticatedUser[] = [
+  {
+    key: 'team_01',
+    sub: 'tc-sub-team-4410-vn',
+    username: 'team_cleanwater',
+    displayName: 'Lan Nguyen (Project Team Lead)',
+    roles: ['PROJECT_TEAM'],
+    authSource: 'DEMO_SIMULATOR_ADAPTER',
+  },
+  {
+    key: 'sponsor_01',
+    sub: 'tc-sub-sponsor-8821-vn',
+    username: 'sponsor_greenfund',
+    displayName: 'Minh Tran (Sponsor - Green Relief Fund)',
+    roles: ['SPONSOR'],
+    authSource: 'DEMO_SIMULATOR_ADAPTER',
+  },
+  {
+    key: 'auditor_01',
+    sub: 'tc-sub-auditor-9903-vn',
+    username: 'auditor_independent',
+    displayName: 'Kiet Le (Independent Field Auditor)',
+    roles: ['AUDITOR'],
+    authSource: 'DEMO_SIMULATOR_ADAPTER',
+  },
+  {
+    key: 'admin_rogue',
+    sub: 'tc-sub-admin-0001-vn',
+    username: 'sysadmin_rogue',
+    displayName: 'Hung Pham (Platform Admin #1)',
+    roles: ['PLATFORM_ADMIN'],
+    authSource: 'DEMO_SIMULATOR_ADAPTER',
+  },
+];
+
+function createFallbackCampaign(): CampaignState {
+  const initialHash = '0x8f4a9c21d7e05b3a11c9e402';
+  return {
+    id: 'CWF-001',
+    title: 'Clean Water for Flood Communities',
+    subtitle: 'Nước sạch cho vùng lũ — Quản lý quỹ tài trợ minh bạch theo từng giai đoạn',
+    totalBudgetVnd: 100000000,
+    releasedBudgetVnd: 0,
+    ownerSub: 'tc-sub-sponsor-8821-vn',
+    policyVersion: 1,
+    status: 'ACTIVE',
+    milestones: [
+      {
+        id: 'M1',
+        campaignId: 'CWF-001',
+        sequence: 1,
+        title: '1. Pilot Deployment',
+        description: 'Mua sắm và lắp đặt thử nghiệm 40 bộ lọc nước gốm tại xã vùng rốn lũ.',
+        unlockCondition: 'Duyệt kế hoạch mua thiết bị; sau giải ngân phải nộp hóa đơn và minh chứng bàn giao.',
+        budgetVnd: 20000000,
+        status: 'REQUESTED',
+        activeRequestId: 'REQ-001',
+      },
+      {
+        id: 'M2',
+        campaignId: 'CWF-001',
+        sequence: 2,
+        title: '2. Community Expansion',
+        description: 'Mở rộng lắp đặt 80 bộ lọc nước và trạm cấp nước cộng đồng tại 3 thôn tiếp theo.',
+        unlockCondition: 'Giai đoạn 1 đã được Auditor xác minh (VERIFIED); yêu cầu mới phải được 2 bên phê duyệt.',
+        budgetVnd: 30000000,
+        status: 'LOCKED',
+      },
+      {
+        id: 'M3',
+        campaignId: 'CWF-001',
+        sequence: 3,
+        title: '3. Final Installation',
+        description: 'Hoàn thiện hệ thống lọc tổng cho trường học xã và bàn giao quy trình bảo trì.',
+        unlockCondition: 'Giai đoạn 2 hoàn thành và được xác minh; tiếp tục duyệt chi theo quy trình.',
+        budgetVnd: 50000000,
+        status: 'LOCKED',
+      },
+    ],
+    requests: [
+      {
+        id: 'REQ-001',
+        campaignId: 'CWF-001',
+        milestoneId: 'M1',
+        version: 1,
+        amountVnd: 20000000,
+        recipientId: 'SUPPLIER-VIETWATER-01',
+        purpose: 'Purchase 40 ceramic pilot water filtration units for Quang Binh commune',
+        createdBySub: 'tc-sub-team-4410-vn',
+        status: 'PENDING_APPROVAL',
+        policyVersion: 1,
+        requestHash: initialHash,
+        approvalsRequired: ['SPONSOR', 'AUDITOR'],
+        approvals: [],
+        createdAt: new Date(Date.now() - 1000 * 60 * 25).toISOString(),
+        updatedAt: new Date(Date.now() - 1000 * 60 * 25).toISOString(),
+      },
+    ],
+    qeaPendingRequests: [
+      {
+        id: 'QEA-ESC-01',
+        targetUserSub: 'tc-sub-admin-alt-99',
+        targetUsername: 'hung_shadow_account',
+        requestedByAdminSub: 'tc-sub-admin-0001-vn',
+        requestedRole: 'SPONSOR',
+        currentApprovals: 1,
+        requiredQuorum: 2,
+        totalRealmAdmins: 3,
+        status: 'PENDING_QUORUM',
+        createdAt: new Date(Date.now() - 1000 * 60 * 10).toISOString(),
+      },
+    ],
+    auditEvents: [
+      {
+        id: 'AUD-001',
+        campaignId: 'CWF-001',
+        actorSub: 'tc-sub-sponsor-8821-vn',
+        actorName: 'Minh Tran (Sponsor)',
+        actorRole: 'SPONSOR',
+        entityType: 'CAMPAIGN',
+        entityId: 'CWF-001',
+        action: 'CAMPAIGN_CREATED',
+        details: 'Committed 100,000,000 VND across 3 sequential milestones (20M / 30M / 50M) under policy MILESTONE_TRUST_V1.',
+        status: 'RECORDED',
+        timestamp: new Date(Date.now() - 1000 * 60 * 40).toISOString(),
+      },
+      {
+        id: 'AUD-002',
+        campaignId: 'CWF-001',
+        actorSub: 'tc-sub-team-4410-vn',
+        actorName: 'Lan Nguyen (Project Team)',
+        actorRole: 'PROJECT_TEAM',
+        entityType: 'REQUEST',
+        entityId: 'REQ-001',
+        action: 'DISBURSEMENT_REQUESTED',
+        details: 'Requested 20,000,000 VND for M1 (Pilot Deployment). Waiting for independent SPONSOR + AUDITOR approvals.',
+        requestHash: initialHash,
+        status: 'RECORDED',
+        timestamp: new Date(Date.now() - 1000 * 60 * 25).toISOString(),
+      },
+    ],
+  };
 }
-function Connected({auth}:{auth:Auth}) {
-  const tide=useTideCloak();
-  const headers=useMemo<Record<string,string>>(()=>{const result:Record<string,string>={};if(tide.token)result.Authorization=`Bearer ${tide.token}`;return result;},[tide.token]);
-  useEffect(()=>{if(tide.authenticated && location.pathname==='/auth/redirect') history.replaceState({},'','/');},[tide.authenticated]);
-  return <Workspace auth={auth} tokenHeaders={headers} signIn={()=>tide.login()} signOut={()=>tide.logout()} authError={tide.initError ? 'TideCloak initialization failed. Check your adapter, redirect URIs and server.' : ''}/>;
-}
-function Workspace({auth,tokenHeaders,signIn,signOut,authError}:{auth:Auth;tokenHeaders?:Record<string,string>;signIn?:()=>void;signOut?:()=>void;authError?:string}) {
-  const [demo,setDemo]=useState('team');const [state,setState]=useState<State|null>(null);
-  const [view,setView]=useState('workspace');const [selected,setSelected]=useState('M1');
-  const [notice,setNotice]=useState('');const [error,setError]=useState('');const [busy,setBusy]=useState(false);
-  const [recipient,setRecipient]=useState('WaterWorks Co-op');const [purpose,setPurpose]=useState('Purchase and install pilot water filtration equipment');
-  const [evidence,setEvidence]=useState('');const [editing,setEditing]=useState(false);
-  const headers=useMemo<Record<string,string>>(()=>auth.mode==='demo'?{'x-demo-role':demo}:tokenHeaders||{},[auth.mode,demo,tokenHeaders]);
-  const load=useCallback(async()=>{try {const r=await fetch('/api/state',{headers});const x=await r.json();if(!r.ok)throw Error(x.error);setState(x);setError('');}catch(e){setError((e as Error).message);}},[headers]);
-  useEffect(()=>{void load();},[load]);
-  async function action(body:Record<string,unknown>,message:string) {
-    setBusy(true);setError('');setNotice('');
-    try {const r=await fetch('/api/actions',{method:'POST',headers:{...headers,'Content-Type':'application/json'},body:JSON.stringify(body)});const x=await r.json();if(!r.ok)throw Error(x.error);await load();setNotice(message);setEditing(false);}catch(e){setError((e as Error).message);}finally{setBusy(false);}
-  }
-  const actor=state?.actor;const can=(role:string)=>Boolean(actor?.roles.includes(role));
-  const milestone=state?.milestones.find(m=>m.id===selected);
-  const funding=state?.requests.find(r=>r.milestone_id===selected);
-  const approvals=state?.approvals.filter(a=>a.request_id===funding?.id)||[];
-  const released=state?.payments.reduce((s,p)=>s+p.amount,0)||0;
-  const verified=state?.milestones.filter(m=>m.status==='VERIFIED').length||0;
-  const approve=(role:string)=>action({action:'approve',requestId:funding?.id,requestHash:funding?.hash,role},'Approval recorded for this request version.');
-  const requestForm=(edit=false)=><form onSubmit={e=>{e.preventDefault();void action({action:edit?'edit':'request',milestoneId:selected,amount:milestone?.amount,recipient,purpose},edit?'Request revised. Both approvals must be collected again.':'Funding request sent for independent review.');}}>
-    <label>Recipient<input required maxLength={100} value={recipient} onChange={e=>setRecipient(e.target.value)}/></label>
-    <label>Purpose<textarea required maxLength={500} value={purpose} onChange={e=>setPurpose(e.target.value)}/></label>
-    <div className="form-footer"><span>Fixed allocation <b>{money(milestone?.amount||0)} VND</b></span><button disabled={busy} className="primary">{edit?'Save new version':'Request funding'}<ArrowRight size={16}/></button></div>
-  </form>;
-  return <div className="shell">
-    <aside className="sidebar"><a className="brand" href="/"><span className="brand-icon"><Droplets size={23}/></span><span>Milestone<span className="brand-light">Trust</span><small>PROGRESS WITH PURPOSE</small></span></a>
-      <div className="workspace-label">YOUR WORKSPACE</div><div className="workspace-switch"><span className="square-icon"><HeartHandshake size={18}/></span><div>Community relief<small>Campaign CWF-001</small></div><ChevronDown size={15}/></div>
-      <nav>{[['workspace','Campaign workspace',LayoutDashboard],['governance','Identity governance',ShieldCheck],['activity','Activity log',Clock3]].map(([key,label,Icon])=><button key={String(key)} className={view===key?'nav active':'nav'} onClick={()=>setView(String(key))}>{typeof Icon!=='string'&&<Icon size={18}/>}<span>{String(label)}</span>{view===key&&<span className="nav-dot"/>}</button>)}</nav>
-      <div className="sidebar-note"><ShieldCheck size={21}/><strong>Accountability, together.</strong><p>Project teams request. Independent people approve. Progress opens the next stage.</p><span className="tiny-label">RMIT HACKATHON 2026</span></div>
-      <div className="sidebar-bottom"><span className="live-dot"/> {auth.mode==='demo'?'Local demonstration':'TideCloak authentication'}<small>Synthetic data. Simulated funds.</small></div>
-    </aside>
-    <main><header className="topbar"><span>Community relief <span className="slash">/</span> <b>{view==='workspace'?'Campaign workspace':view==='governance'?'Identity governance':'Activity log'}</b></span><div className="session-controls">{auth.mode==='demo'?<><span className="demo-label">DEMO IDENTITY</span><select aria-label="Demo identity" value={demo} onChange={e=>{setDemo(e.target.value);setNotice('');setError('');}}>{Object.entries(names).map(([key,name])=><option key={key} value={key}>{name}</option>)}</select></>:actor?<><span className="identity"><Fingerprint size={16}/>{actor.name}</span><button className="icon-button" title="Sign out" onClick={signOut}><LogOut size={17}/></button></>:<button className="primary small" onClick={signIn} disabled={!auth.configured}>Sign in with TideCloak</button>}<button className="icon-button" title="Refresh workspace" onClick={()=>void load()}><RefreshCw size={17}/></button></div></header>
-      <div className="content">
-        {auth.mode==='demo'&&<div className="mode-banner">Local demo uses simulated identities. Live TideCloak login and QEA are not connected in this mode.</div>}
-        {auth.mode==='tidecloak'&&!auth.configured&&<div className="mode-banner">TideCloak setup required. Public campaign is visible. Protected actions stay locked until a valid adapter and login are configured. See config/README.md.</div>}
-        {(error||authError)&&<div className="alert error" role="alert"><X size={17}/>{error||authError}</div>}{notice&&<div className="alert success" role="status"><Check size={17}/>{notice}</div>}
-        {view==='workspace'?<>
-          <div className="eyebrow"><span className="pill green">COMMUNITY RELIEF</span><span>CWF-001</span></div>
-          <div className="hero"><div><h1>Clean water for<br/>flood communities.</h1><p>A community-led water project, funded one verified milestone at a time.</p></div><div className="hero-stamp"><Droplets size={28}/><span>Safer water.<br/><strong>Shared responsibility.</strong></span></div></div>
-          <div className="stats"><div><span>Total committed</span><strong>100,000,000 <small>VND</small></strong><p>Across three project milestones</p></div><div><span>Released to the project</span><strong>{money(released)} <small>VND</small></strong><p><ArrowDownLeft size={13}/> Simulated payments only</p></div><div><span>Milestones verified</span><strong>{verified}<small> / 3</small></strong><p>{verified===0?'First delivery is awaiting verification':`${3-verified} stages remain`}</p></div></div>
-          <div className="section-heading"><div><h2>Funding milestones</h2><p>Each stage earns the right to request the next release.</p></div><span className="muted">100M VND allocated</span></div>
-          <div className="milestones">{state?.milestones.map(m=><button key={m.id} onClick={()=>{setSelected(m.id);setEditing(false);setError('');setNotice('');}} className={`milestone ${selected===m.id?'selected':''}`}><div className="milestone-top"><span className={`step ${m.status==='VERIFIED'?'done':''}`}>{m.status==='LOCKED'?<LockKeyhole size={16}/>:m.status==='VERIFIED'?<Check size={17}/>:String(m.seq).padStart(2,'0')}</span><span className={`status status-${m.status.toLowerCase()}`}>{labels[m.status]}</span></div><h3>{m.title}</h3><div className="allocation">{money(m.amount)} <span>VND</span></div><p>{m.seq===1?'Equipment and first on-site installation':`Requires verified completion of milestone ${m.seq-1}`}</p></button>)}</div>
-          <div className="workspace-grid"><section className="panel request-panel"><div className="panel-heading"><div><span className="tiny-label">MILESTONE {milestone?.seq||1}</span><h2>{milestone?.title||'Loading campaign…'}</h2></div><FileCheck2 size={22}/></div>
-            {milestone?.status==='LOCKED'?<div className="empty-state"><LockKeyhole size={30}/><h3>This stage is still locked</h3><p>The auditor must verify the previous milestone before the team can request this allocation.</p></div>:!funding?can('mt_team')?requestForm():<div className="empty-state"><Flag size={30}/><h3>Ready for a project request</h3><p>The project team can submit the recipient and purpose for this milestone.</p></div>:<>
-              <div className="request-summary"><div><span>Requested allocation</span><strong>{money(funding.amount)} <small>VND</small></strong></div><span className="pill">VERSION {funding.version}</span></div>
-              <div className="detail-line"><span>Recipient</span><b>{funding.recipient}</b></div><div className="purpose">{funding.purpose}</div>
-              <div className="approvals">{(['mt_sponsor','mt_auditor'] as const).map(role=>{const approved=approvals.some(a=>a.role===role);return <div className={`approval ${approved?'approved':''}`} key={role}><div className="approval-icon">{approved?<CheckCheck size={18}/>:<Users size={18}/>}</div><div><strong>{role==='mt_sponsor'?'Sponsor':'Independent auditor'}</strong><span>{approved?'Approved this version':'Review required'}</span></div><button className="outline small" disabled={busy||approved||!can(role)||funding.status!=='PENDING'} onClick={()=>void approve(role)}>{approved?'Approved':'Approve'}</button></div>;})}</div>
-              <div className="release-row"><span>{funding.status==='PAID'?<><Check size={16}/> Payment recorded</>:`${approvals.length} of 2 independent approvals`}</span><button className="primary" disabled={busy||!can('mt_sponsor')||funding.status!=='APPROVED'} onClick={()=>void action({action:'pay',requestId:funding.id},'Simulated payment recorded exactly once. No real funds moved.')}><Wallet size={16}/>Release simulated funds</button></div>
-              {can('mt_team')&&funding.status!=='PAID'&&<button className="text-button" onClick={()=>{setEditing(!editing);setRecipient(funding.recipient);setPurpose(funding.purpose);}}>Revise request and clear approvals</button>}{editing&&requestForm(true)}
-              {funding.status==='PAID'&&milestone?.status!=='VERIFIED'&&<div className="evidence"><h3>Verify the outcome</h3><p>Record the delivery evidence before the next stage opens.</p>{milestone?.evidence&&<blockquote>{milestone.evidence}</blockquote>}{can('mt_team')&&<form onSubmit={e=>{e.preventDefault();void action({action:'evidence',milestoneId:selected,evidence},'Evidence submitted for auditor review.');}}><textarea aria-label="Delivery evidence" required maxLength={2000} value={evidence} onChange={e=>setEvidence(e.target.value)} placeholder="Describe the synthetic invoice and delivery confirmation…"/><button className="outline" disabled={busy}>Submit evidence</button></form>}{can('mt_auditor')&&<button className="primary" disabled={busy||!milestone?.evidence} onClick={()=>void action({action:'verify',milestoneId:selected},'Milestone verified. The next stage is open for a new request.')}><FileCheck2 size={16}/>Verify delivery and unlock next stage</button>}</div>}
-              {milestone?.status==='VERIFIED'&&<div className="verified-note"><CheckCheck size={20}/> Delivery verified. The next stage may request funding.</div>}
-            </>}
-          </section><aside className="panel trust-panel"><span className="square-icon"><ShieldCheck size={21}/></span><h2>Two layers of accountability.</h2><div className="trust-step"><span>01</span><div><h3>Independent funding decisions</h3><p>The sponsor and auditor approve the same request. Editing it clears both approvals.</p></div></div><div className="trust-step"><span>02</span><div><h3>Governed identity changes</h3><p>TideCloak QEA requires a realm-admin quorum for protected role changes.</p></div></div><div className="trust-footnote">Payments and milestone rules run in this prototype’s backend. QEA governs identity changes.</div><button className="text-button" onClick={()=>setView('governance')}>View identity governance <ArrowRight size={15}/></button></aside></div>
-        </>:view==='governance'?<>
-          <div className="eyebrow"><span className="pill green">TIDECLOAK</span><span>IDENTITY GOVERNANCE</span></div><h1 className="single-title">No unilateral role changes.</h1><p className="intro">Verify who can change the people and permissions behind this campaign.</p>
-          <section className="panel governance"><ShieldCheck size={36}/><h2>{auth.mode==='demo'?'Live QEA is not connected':auth.configured?'Open the live Tide Console':'Configure your TideCloak realm'}</h2><p>Use three independently enrolled realm admins. The documented quorum is two. A proposed role change must remain pending below quorum, then apply after the second approval.</p><div className="governance-facts"><div><span>Business approval</span><b>Sponsor + Auditor</b><small>Enforced by this app</small></div><div><span>Identity governance</span><b>Live TideCloak QEA</b><small>Verify in your realm</small></div><div><span>Payment rail</span><b>Simulated</b><small>No real funds transferred</small></div></div>
-          {auth.consoleUrl?<a className="primary" target="_blank" rel="noreferrer" href={auth.consoleUrl}>Open Tide Console<ExternalLink size={16}/></a>:<a className="outline" href="https://docs.tide.org/Admin/SetupIGA" target="_blank" rel="noreferrer">QEA setup guide<ExternalLink size={16}/></a>}
-          <div className="boundary"><h3>What this prototype proves</h3><p>Independent application approvals, version binding, replay-safe mock payments, and milestone sequencing can be tested here. Live authentication and QEA must be exercised with your configured Tide realm. This app does not simulate QEA evidence or protect its SQLite database from its own server administrator.</p></div></section>
-        </>:<><div className="eyebrow"><span className="pill green">CAMPAIGN RECORD</span></div><h1 className="single-title">Every step, in the open.</h1><p className="intro">An application activity log for this synthetic campaign. It is not an immutable cryptographic ledger.</p><section className="panel activity">{state?.audit.length?state.audit.map(a=><div className="activity-item" key={a.id}><span className="activity-dot"/><div><strong>{a.event}</strong><p>{a.detail}</p><time>{new Date(a.created_at).toLocaleString()}</time></div></div>):<div className="empty-state"><Clock3 size={30}/><h3>A fresh start</h3><p>The first funding request will appear here.</p></div>}</section></>}
-        <footer><span>MilestoneTrust</span><span>Built for communities. Governed together.</span><span>RMIT × Tide · Challenge 2</span></footer>
-      </div>
-    </main>
-  </div>;
+
+export default function MilestoneTrustApp() {
+  const [activeTab, setActiveTab] = useState<string>('dashboard');
+  const [selectedActorKey, setSelectedActorKey] = useState<string>('team_01');
+  const [campaign, setCampaign] = useState<CampaignState>(createFallbackCampaign);
+  const [availableIdentities, setAvailableIdentities] =
+    useState<AuthenticatedUser[]>(FALLBACK_IDENTITIES);
+  const [isSubmitting, setIsSubmitting] = useState<boolean>(false);
+  const [bannerFeedback, setBannerFeedback] = useState<{
+    type: 'success' | 'error';
+    message: string;
+  } | null>(null);
+
+  const currentUser =
+    availableIdentities.find((i) => i.key === selectedActorKey) ||
+    FALLBACK_IDENTITIES[0];
+
+  // Try syncing with backend API if teammate has /api/campaign running
+  const fetchStateFromApi = useCallback(async (actorKey: string) => {
+    try {
+      const res = await fetch('/api/campaign', {
+        headers: { 'x-demo-actor-id': actorKey },
+      });
+      if (!res.ok) return;
+      const data = await res.json();
+      if (data.campaign) setCampaign(data.campaign);
+      if (data.availableDemoIdentities) {
+        setAvailableIdentities(data.availableDemoIdentities);
+      }
+    } catch {
+      // Runs smoothly in pure Frontend UI mode if /api is not mounted yet
+    }
+  }, []);
+
+  useEffect(() => {
+    fetchStateFromApi(selectedActorKey);
+  }, [selectedActorKey, fetchStateFromApi]);
+
+  const handleResetDemo = async () => {
+    setIsSubmitting(true);
+    try {
+      const res = await fetch('/api/campaign', { method: 'POST' });
+      if (res.ok) {
+        const data = await res.json();
+        setCampaign(data.campaign);
+        setBannerFeedback({ type: 'success', message: data.message });
+        return;
+      }
+    } catch {
+      // Fallback UI reset
+    } finally {
+      setIsSubmitting(false);
+    }
+    setCampaign(createFallbackCampaign());
+    setBannerFeedback({
+      type: 'success',
+      message: 'Demo state reset to initial Campaign #CWF-001 (100,000,000 ₫).',
+    });
+  };
+
+  const handleCreateOrUpdateRequest = async (payload: {
+    milestoneId: string;
+    amountVnd: number;
+    recipientId: string;
+    purpose: string;
+  }) => {
+    setIsSubmitting(true);
+    try {
+      const res = await fetch('/api/requests', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'x-demo-actor-id': selectedActorKey,
+        },
+        body: JSON.stringify(payload),
+      });
+      if (res.ok || res.status === 403) {
+        const data = await res.json();
+        if (data.campaign) setCampaign(data.campaign);
+        setBannerFeedback({
+          type: data.ok ? 'success' : 'error',
+          message: data.message,
+        });
+        return;
+      }
+    } catch {
+      // Pure Frontend interactive fallback
+    } finally {
+      setIsSubmitting(false);
+    }
+
+    // Pure Frontend Fallback Logic for R2, R3, R7
+    const targetMilestone = campaign.milestones.find(
+      (m) => m.id === payload.milestoneId
+    );
+    if (!targetMilestone || targetMilestone.status === 'LOCKED') {
+      setBannerFeedback({
+        type: 'error',
+        message: `Policy R2 Violation: Milestone ${payload.milestoneId} is LOCKED. Previous milestone completion evidence must be verified first.`,
+      });
+      return;
+    }
+    if (payload.amountVnd <= 0 || payload.amountVnd > targetMilestone.budgetVnd) {
+      setBannerFeedback({
+        type: 'error',
+        message: `Policy R3 Violation: Requested amount exceeds Milestone ${targetMilestone.id} cap (${targetMilestone.budgetVnd.toLocaleString()} ₫).`,
+      });
+      return;
+    }
+
+    const newHash =
+      '0x' +
+      Math.abs(
+        payload.amountVnd * 31 + payload.purpose.length * 17 + Date.now()
+      )
+        .toString(16)
+        .padEnd(24, 'a')
+        .slice(0, 24);
+
+    setCampaign((prev) => {
+      const next = structuredClone(prev);
+      const existing = next.requests.find(
+        (r) => r.milestoneId === payload.milestoneId
+      );
+      if (existing) {
+        const oldApprovals = existing.approvals.length;
+        existing.version += 1;
+        existing.amountVnd = payload.amountVnd;
+        existing.recipientId = payload.recipientId;
+        existing.purpose = payload.purpose;
+        existing.requestHash = newHash;
+        existing.approvals = [];
+        existing.status = 'PENDING_APPROVAL';
+        setBannerFeedback({
+          type: 'success',
+          message: `Policy R7 Triggered: Request updated to v${existing.version} with new hash ${newHash}. ${oldApprovals} prior approval(s) were invalidated!`,
+        });
+      }
+      return next;
+    });
+  };
+
+  const handleApproveRequest = async (
+    requestId: string,
+    requestHash: string,
+    overrideActorKey?: string
+  ) => {
+    const actorKey = overrideActorKey || selectedActorKey;
+    if (overrideActorKey) setSelectedActorKey(overrideActorKey);
+
+    setIsSubmitting(true);
+    try {
+      const res = await fetch(`/api/requests/${requestId}/approve`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'x-demo-actor-id': actorKey,
+        },
+        body: JSON.stringify({ requestHash }),
+      });
+      if (res.ok || res.status === 403) {
+        const data = await res.json();
+        if (data.campaign) setCampaign(data.campaign);
+        setBannerFeedback({
+          type: data.ok ? 'success' : 'error',
+          message: data.message,
+        });
+        return;
+      }
+    } catch {
+      // Pure Frontend interactive fallback
+    } finally {
+      setIsSubmitting(false);
+    }
+
+    const actor =
+      availableIdentities.find((i) => i.key === actorKey) || currentUser;
+
+    if (actor.roles.includes('PLATFORM_ADMIN')) {
+      setBannerFeedback({
+        type: 'error',
+        message:
+          'Policy R8 Violation: Platform Admin cannot approve disbursements using admin role alone.',
+      });
+      return;
+    }
+    if (actor.roles.includes('PROJECT_TEAM')) {
+      setBannerFeedback({
+        type: 'error',
+        message:
+          'Policy R4 Violation: The Project Team cannot self-approve its own disbursement request.',
+      });
+      return;
+    }
+
+    const role = actor.roles.includes('SPONSOR') ? 'SPONSOR' : 'AUDITOR';
+
+    setCampaign((prev) => {
+      const next = structuredClone(prev);
+      const req = next.requests.find((r) => r.id === requestId);
+      if (!req) return prev;
+      if (requestHash !== req.requestHash) {
+        setBannerFeedback({
+          type: 'error',
+          message:
+            'Policy R7 Violation: Request hash mismatch! Payload was modified after approval.',
+        });
+        return prev;
+      }
+      if (!req.approvals.some((a) => a.role === role)) {
+        req.approvals.push({
+          id: `APP-${role}`,
+          requestId: req.id,
+          approverSub: actor.sub,
+          approverName: actor.displayName,
+          role,
+          decision: 'APPROVED',
+          requestHash: req.requestHash,
+          approvedAt: new Date().toISOString(),
+        });
+      }
+      if (req.approvals.length === 2) {
+        req.status = 'APPROVED';
+      }
+      setBannerFeedback({
+        type: 'success',
+        message: `${role} approval recorded (${req.approvals.length}/2 quorum).`,
+      });
+      return next;
+    });
+  };
+
+  const handleExecutePayment = async (requestId: string) => {
+    setIsSubmitting(true);
+    try {
+      const res = await fetch(`/api/requests/${requestId}/pay`, {
+        method: 'POST',
+        headers: { 'x-demo-actor-id': selectedActorKey },
+      });
+      if (res.ok || res.status === 403) {
+        const data = await res.json();
+        if (data.campaign) setCampaign(data.campaign);
+        setBannerFeedback({
+          type: data.ok ? 'success' : 'error',
+          message: data.message,
+        });
+        return;
+      }
+    } catch {
+      // Fallback
+    } finally {
+      setIsSubmitting(false);
+    }
+
+    setCampaign((prev) => {
+      const next = structuredClone(prev);
+      const req = next.requests.find((r) => r.id === requestId);
+      if (!req) return prev;
+      if (req.payment) {
+        setBannerFeedback({
+          type: 'error',
+          message: `Policy R9 Violation: Request ${req.id} was already paid. Duplicate payment blocked by idempotency key.`,
+        });
+        return prev;
+      }
+      if (req.approvals.length < 2) {
+        setBannerFeedback({
+          type: 'error',
+          message:
+            'Policy R5 Violation: Both SPONSOR and AUDITOR approvals are required before payment.',
+        });
+        return prev;
+      }
+      req.payment = {
+        id: `PAY-${req.id}`,
+        requestId: req.id,
+        idempotencyKey: `IDEMP-${req.id}-v${req.version}`,
+        amountVnd: req.amountVnd,
+        status: 'COMPLETED',
+        simulatedTransactionId: `MOCK-TX-${Date.now().toString().slice(-6)}`,
+        paidAt: new Date().toISOString(),
+      };
+      req.status = 'PAID';
+      next.releasedBudgetVnd += req.amountVnd;
+      const m = next.milestones.find((item) => item.id === req.milestoneId);
+      if (m) m.status = 'DISBURSED';
+      setBannerFeedback({
+        type: 'success',
+        message: `Mock Payment Completed! ${req.amountVnd.toLocaleString()} ₫ released.`,
+      });
+      return next;
+    });
+  };
+
+  const handleSubmitEvidence = async (
+    milestoneId: string,
+    payload: { description: string; invoiceCode: string; fileUrl: string }
+  ) => {
+    setIsSubmitting(true);
+    try {
+      const res = await fetch(`/api/milestones/${milestoneId}/evidence`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'x-demo-actor-id': selectedActorKey,
+        },
+        body: JSON.stringify(payload),
+      });
+      if (res.ok || res.status === 403) {
+        const data = await res.json();
+        if (data.campaign) setCampaign(data.campaign);
+        setBannerFeedback({
+          type: data.ok ? 'success' : 'error',
+          message: data.message,
+        });
+        return;
+      }
+    } catch {
+      // Fallback
+    } finally {
+      setIsSubmitting(false);
+    }
+
+    setCampaign((prev) => {
+      const next = structuredClone(prev);
+      const m = next.milestones.find((item) => item.id === milestoneId);
+      if (!m || m.status !== 'DISBURSED') {
+        setBannerFeedback({
+          type: 'error',
+          message: `Milestone ${milestoneId} must be DISBURSED before uploading completion evidence.`,
+        });
+        return prev;
+      }
+      m.evidence = {
+        id: `EVID-${milestoneId}`,
+        milestoneId,
+        submittedBySub: currentUser.sub,
+        description: payload.description,
+        invoiceCode: payload.invoiceCode,
+        fileUrl: payload.fileUrl,
+        status: 'PENDING_VERIFICATION',
+        submittedAt: new Date().toISOString(),
+      };
+      setBannerFeedback({
+        type: 'success',
+        message: `Completion evidence uploaded for ${milestoneId}. Ready for Auditor verification!`,
+      });
+      return next;
+    });
+  };
+
+  const handleVerifyEvidence = async (milestoneId: string) => {
+    setSelectedActorKey('auditor_01');
+    setIsSubmitting(true);
+    try {
+      const res = await fetch(`/api/milestones/${milestoneId}/verify`, {
+        method: 'POST',
+        headers: { 'x-demo-actor-id': 'auditor_01' },
+      });
+      if (res.ok || res.status === 403) {
+        const data = await res.json();
+        if (data.campaign) setCampaign(data.campaign);
+        setBannerFeedback({
+          type: data.ok ? 'success' : 'error',
+          message: data.message,
+        });
+        return;
+      }
+    } catch {
+      // Fallback
+    } finally {
+      setIsSubmitting(false);
+    }
+
+    setCampaign((prev) => {
+      const next = structuredClone(prev);
+      const m = next.milestones.find((item) => item.id === milestoneId);
+      if (!m || !m.evidence) {
+        setBannerFeedback({
+          type: 'error',
+          message:
+            'Please upload completion evidence in Project Workspace before verifying!',
+        });
+        return prev;
+      }
+      m.status = 'VERIFIED';
+      m.evidence.status = 'VERIFIED';
+      const nextM = next.milestones.find(
+        (item) => item.sequence === m.sequence + 1
+      );
+      if (nextM && nextM.status === 'LOCKED') {
+        nextM.status = 'ELIGIBLE';
+      }
+      setBannerFeedback({
+        type: 'success',
+        message: `Policy R10 Executed: ${milestoneId} VERIFIED! Next stage ${nextM?.id} is now UNLOCKED (ELIGIBLE).`,
+      });
+      return next;
+    });
+  };
+
+  const activeRequest = campaign.requests[0];
+  const pendingApprovalsCount = activeRequest ? activeRequest.approvals.length : 0;
+
+  return (
+    <div className="min-h-screen bg-slate-50 text-slate-900 flex flex-col">
+      <Navbar
+        activeTab={activeTab}
+        setActiveTab={setActiveTab}
+        currentUser={currentUser}
+        selectedActorKey={selectedActorKey}
+        onSelectActor={setSelectedActorKey}
+        availableIdentities={availableIdentities}
+        onResetDemo={handleResetDemo}
+        pendingApprovalsCount={pendingApprovalsCount}
+      />
+
+      <main className="flex-1 max-w-7xl w-full mx-auto px-4 sm:px-6 lg:px-8 py-6 space-y-6">
+        {/* Live Toast / Policy Feedback Alert */}
+        {bannerFeedback && (
+          <div
+            role="status"
+            className={`rounded-2xl p-4 border flex items-start justify-between gap-3 shadow-sm transition-all ${
+              bannerFeedback.type === 'success'
+                ? 'bg-emerald-50 border-emerald-300 text-emerald-950'
+                : 'bg-rose-50 border-rose-300 text-rose-950'
+            }`}
+          >
+            <div className="flex items-start gap-2.5 text-xs sm:text-sm font-bold">
+              {bannerFeedback.type === 'success' ? (
+                <CheckCircle2 className="w-5 h-5 text-emerald-600 shrink-0 mt-0.5" />
+              ) : (
+                <AlertOctagon className="w-5 h-5 text-rose-600 shrink-0 mt-0.5" />
+              )}
+              <span>{bannerFeedback.message}</span>
+            </div>
+            <button
+              onClick={() => setBannerFeedback(null)}
+              className="text-slate-400 hover:text-slate-700"
+              aria-label="Close alert"
+            >
+              <X className="w-4 h-4" />
+            </button>
+          </div>
+        )}
+
+        {activeTab === 'dashboard' && (
+          <PublicDashboard campaign={campaign} onNavigate={setActiveTab} />
+        )}
+
+        {activeTab === 'workspace' && (
+          <ProjectWorkspace
+            campaign={campaign}
+            currentUser={currentUser}
+            onCreateOrUpdateRequest={handleCreateOrUpdateRequest}
+            onSubmitEvidence={handleSubmitEvidence}
+            isSubmitting={isSubmitting}
+          />
+        )}
+
+        {activeTab === 'approvals' && (
+          <ApprovalCenter
+            campaign={campaign}
+            currentUser={currentUser}
+            onApproveRequest={(id, hash) => handleApproveRequest(id, hash)}
+            onExecutePayment={handleExecutePayment}
+            onVerifyEvidence={handleVerifyEvidence}
+            onSwitchActorAndApprove={(actorKey, id, hash) =>
+              handleApproveRequest(id, hash, actorKey)
+            }
+            isSubmitting={isSubmitting}
+          />
+        )}
+
+        {activeTab === 'security' && (
+          <SecurityGovernance campaign={campaign} currentUser={currentUser} />
+        )}
+
+        {activeTab === 'audit' && <AuditTrail events={campaign.auditEvents} />}
+      </main>
+
+      <footer className="bg-white border-t border-slate-200/80 py-5 mt-12">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 flex flex-col sm:flex-row items-center justify-between text-xs text-slate-500 gap-2">
+          <div>
+            <strong className="text-slate-800">MilestoneTrust MVP</strong> — RMIT
+            Hackathon 2026 Challenge 2 (Tide UNLOCKED)
+          </div>
+          <div>
+            Synthetic Hackathon Dataset (#CWF-001 • 100,000,000 ₫) • Protected by
+            TideCloak OIDC & QEA
+          </div>
+        </div>
+      </footer>
+    </div>
+  );
 }
