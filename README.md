@@ -20,6 +20,10 @@ Milestone-based relief funding with independent spending approvals and TideCloak
 
 This screenshot shows the earlier workspace with simulated local identities. The current frontend has five tabs: Public Dashboard, Project Workspace, Approval Center, TideCloak & QEA, and Public Audit Trail. The screenshot is not evidence of live Tide authentication or QEA or a visual check of the new frontend.
 
+![Current local simulation: signed-in auditor and role eligibility](docs/tide-simulation.png)
+
+The current screenshot and browser walkthrough use the explicit simulated sign-in flow. Live TideCloak authentication and QEA remain separate, unverified steps.
+
 ## Run the local demonstration
 
 Requires **Node.js 24+** and npm. The database uses Node's built-in SQLite. No Docker or Tide account is required for the explicitly simulated local mode.
@@ -29,7 +33,7 @@ npm ci
 npm run demo
 ```
 
-Open **http://localhost:3000**. Select Project team, Sponsor, Independent auditor or Platform admin in the top bar. Demo mode binds to loopback and is refused in production. It must not be presented as real authentication or QEA.
+Open **http://localhost:3000**. The app starts as a public visitor. Select Project team, Sponsor, Independent auditor or Platform admin in the top bar, then click **Simulate sign-in**. Sign out before switching accounts. Demo mode binds to loopback and is refused in production. It must not be presented as real authentication or QEA.
 
 For a clean rehearsal, stop the app and run `npm run demo:fresh`. This creates a separate database and preserves previous runs. A [Vietnamese walkthrough](docs/CHAY_DEMO_VI.md) includes exact buttons, expected results and failure cases.
 
@@ -60,9 +64,11 @@ npm run build
 npm run doctor
 ```
 
-The 24 tests cover role and membership checks, self-approval, duplicate subjects, edits, stale approvals, payment idempotency and API input/origin validation through all three milestones. Frontend regression tests check persisted records, failed responses without local fallback, public-role boundaries, and the absence of demo switching in live UI. Signed ES256 fixtures exercise the official verifier against tampering, wrong keys, expired/not-yet-valid tokens, wrong issuer/client and malformed claims. These fixtures use generated local keys, not a live Tide realm.
+The 27 tests cover role and membership checks, self-approval, duplicate subjects, edits, stale approvals, payment idempotency and API input/origin validation through all three milestones. Session tests cover simulated sign-in, server-owned roles, expiry, revocation and local-mode boundaries. Frontend regression tests check persisted records, failed responses without local fallback, public-role boundaries, and the absence of demo switching in live UI. Signed ES256 fixtures exercise the official verifier against tampering, wrong keys, expired/not-yet-valid tokens, wrong issuer/client and malformed claims. These fixtures use generated local keys, not a live Tide realm.
 
-The frontend reads `/api/state` and writes only to `/api/actions`. Errors stay errors; there is no simulated-success fallback. Local identity switching and abuse probes appear only in explicit demo mode. Live mode uses the official TideCloak provider and bearer tokens. The governance tab reports live QEA verification as pending rather than generating fake pending requests or denial evidence.
+The frontend reads `/api/state`, submits campaign changes to `/api/actions`, and uses `/api/demo/session` only for explicit local simulated sign-in/out. Errors stay errors; there is no simulated-success fallback. Local account selection and abuse probes appear only in explicit demo mode. Live mode uses the official TideCloak provider and bearer tokens. The governance tab reports live QEA verification as pending rather than generating fake pending requests or denial evidence.
+
+The [Tide integration plan](docs/TIDE_INTEGRATION_PLAN.md) records the read-only Raziel MCP calls, the role/action matrix, simulation boundaries and remaining live migration gates, including complete DPoP verification. Opaque demo sessions last 30 minutes, are revoked on sign-out and are not persisted in browser storage. The UI displays server-owned roles; selecting a persona alone grants no browser session.
 
 ## Architecture and limits
 

@@ -5,7 +5,7 @@ Performed on 22 October 2026, Windows, Node.js 24.18.0, Next.js 16.4.2 and TideC
 | Check | Result |
 |---|---|
 | TypeScript strict check | Passed |
-| Automated tests | 24 passed |
+| Automated tests | 27 passed |
 | Optimized production build | Passed |
 | Production `/api/state` without adapter | 200; public synthetic records, Tide mode, configured=false |
 | Forged demo header against production action API | 503; no fallback to demo identities |
@@ -31,7 +31,17 @@ The new fresh session has not received another browser walkthrough. The Edge aut
 
 The five-tab frontend now reads the existing `/api/state` and submits the established `/api/actions` contract. Removed the automatic local-success fallback on missing endpoints. Live authentication retains the official TideCloak provider and server-verified bearer token; demo identity switching and abuse probes are restricted to explicit local demo mode. Approval, payment and verification controls use the active actor. Governance reports pending live verification rather than invented QEA events. Public approval/audit records do not disclose actor subjects; the UI does not invent them.
 
-TypeScript, all 24 automated tests and the optimized build passed locally. Four frontend regression tests cover mapping actual persisted revisions/payments/evidence, failed API responses, visitor/non-member role boundaries, and live UI without demo switching. The new frontend has not had a full browser walkthrough; the older screenshot is retained as historical evidence only. Live Tide authentication and QEA remain unverified.
+At the PR #1 merge, TypeScript, all 24 automated tests and the optimized build passed locally. Both PR checks passed at head `088a947`; merged into `evertrust_main` as `3591800`. Post-merge CI run `39755830388` passed at that exact merge commit. Four frontend regression tests cover mapping actual persisted revisions/payments/evidence, failed API responses, visitor/non-member role boundaries, and live UI without demo switching. The older screenshot is historical evidence. Live Tide authentication and QEA remain unverified.
+
+## Explicit simulated sign-in
+
+At the user's subsequent request, added server-issued opaque demo sessions and consulted the public Tide Raziel MCP, version 1.9.33. The [integration plan](TIDE_INTEGRATION_PLAN.md) records the actual guidance calls and remaining live migration gates. This is simulation, not proof of a real Tide session or policy.
+
+All 27 tests pass, including three new session tests: expiry/revocation and server-owned roles; route-handler sign-in → authorized team action / denied admin action → sign-out; and rejection outside local development/demo mode. The real running HTTP server also returned sign-in 200, the expected demo-admin identity, denied admin write 403, logout 200 and revoked-session read 401 across separate routes. No demo tokens are included in these records.
+
+The Edge extension became available again. Browser walkthrough of the new five-tab frontend completed: public visitor → explicit Team sign-in → M1 request → sign out → Sponsor sign-in and approval (1/2, payment locked) → sign out → Auditor sign-in and approval → Sponsor mock payment → Team evidence → Auditor review and verification. M2 became eligible, M3 stayed locked, with only the 20M mock payment recorded. No real Tide account, QEA approval or funds were used.
+
+The optimized build passed with the new `/api/demo/session` route. Screenshot `tide-simulation.png` shows the actual signed-in simulated auditor and role eligibility table; it is local simulation evidence only. The app was restarted after the build, invalidating previous in-memory sessions, and a new explicit demo sign-in succeeded.
 
 ## Live setup attempt on Windows
 

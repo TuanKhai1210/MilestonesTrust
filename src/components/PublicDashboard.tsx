@@ -123,7 +123,7 @@ export default function PublicDashboard({
               <Sparkles className="w-3.5 h-3.5" />
               <span>CAMPAIGN #{campaign.id}</span>
               <span>•</span>
-              <span>ACTIVE ESCROW GOVERNANCE</span>
+              <span>MOCK FUNDING WORKFLOW</span>
               <span>•</span>
               <span>SYNTHETIC HACKATHON DATA</span>
             </div>
@@ -185,7 +185,7 @@ export default function PublicDashboard({
 
           <div className="bg-slate-950/70 backdrop-blur-sm border border-slate-800 rounded-2xl p-5">
             <div className="flex items-center justify-between text-xs font-bold uppercase tracking-wider text-sky-300">
-              <span>Protected Reserve</span>
+              <span>Unreleased Allocation</span>
               <Lock className="w-4 h-4 text-sky-400" />
             </div>
             <p className="text-2xl sm:text-3xl font-extrabold text-sky-300 mt-2 tabular-nums">
@@ -276,7 +276,7 @@ export default function PublicDashboard({
             </p>
           </div>
           <span className="text-xs font-bold text-emerald-700 bg-emerald-50 border border-emerald-200 px-3 py-1 rounded-full">
-            Zero Single-Admin Custody
+            Independent Funding Approvals
           </span>
         </div>
 

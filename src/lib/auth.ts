@@ -1,6 +1,7 @@
 import fs from 'node:fs';
 import { verifyTideCloakToken } from '@tidecloak/nextjs/server';
 import { RuleError, type Actor, type Role } from './domain';
+import { assertDemoRequest, demoActor, demoSessions } from './demo-session';
 
 export const ROLES: Role[] = ['mt_member','mt_team','mt_sponsor','mt_auditor','mt_admin'];
 export function authMode() {
@@ -25,10 +26,17 @@ export function authInfo() {
 }
 export async function authenticate(request: Request): Promise<Actor> {
   if (authMode() === 'demo') {
-    if (!['localhost','127.0.0.1','[::1]'].includes(new URL(request.url).hostname)) throw new RuleError('Demo identities require a loopback URL.', 403);
+    assertDemoRequest(request);
+    const authorization = request.headers.get('authorization');
+    if (authorization) {
+      const token = authorization.match(/^Demo (demo-[a-f0-9]{64})$/)?.[1];
+      if (!token) throw new RuleError('Invalid simulated session. Sign in again.', 401);
+      return demoSessions().verify(token);
+    }
     const key = request.headers.get('x-demo-role');
-    if (!['team','sponsor','auditor','admin'].includes(key || '')) throw new RuleError('Choose a demo identity.', 401);
-    return { sub: `demo-${key}`, name: `Demo ${key}`, roles: ['mt_member', `mt_${key}` as Role] };
+    if (!['team','sponsor','auditor','admin'].includes(key || '')) throw new RuleError('Use simulated sign-in to continue.', 401);
+    // Explicit loopback-only test probes; the browser uses revocable sessions.
+    return demoActor(key);
   }
   const config = adapter();
   if (!config) throw new RuleError('TideCloak is not configured. Follow docs/TIDECLOAK_SETUP.md.', 503);
