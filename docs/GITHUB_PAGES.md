@@ -1,63 +1,53 @@
-# EverTrust GitHub Pages — setup and deployment
+# GitHub Pages deployment
 
-This directory contains EverTrust's **static project overview**, not the Next.js application. The application has API routes, TideCloak authentication and SQLite and therefore cannot be run as a working app on GitHub Pages. Keep sign-in and spending actions in the Node.js application.
+**Public URL:** https://tuankhai1210.github.io/MilestonesTrust/
 
-## Files
+Pages serves the project overview and an illustrative workflow walkthrough. The Next.js app needs API routes and SQLite; run it separately using [SETUP.md](SETUP.md). The public website has no sign-in, authorization or payment execution.
 
-| File | Purpose |
-| --- | --- |
-| `docs/index.html` | Responsive public project overview (static page). |
-| `docs/.nojekyll` | Prevents Jekyll processing of site files. |
-| `.github/workflows/pages.yml` | Deploys the `docs/` directory whenever it changes on `evertrust_main`. |
-| `.mcp.json` | Tide's Raziel MCP configuration for a compatible AI coding agent; this does **not** configure a TideCloak realm or enable QEA. |
+## Deployment
 
-## Enable GitHub Pages
+1. In [Pages settings](https://github.com/TuanKhai1210/MilestonesTrust/settings/pages), select **GitHub Actions**.
+2. Merge website changes into **main**. **Deploy GitHub Pages** validates and deploys the public artifact.
+3. Inspect [the workflow](https://github.com/TuanKhai1210/MilestonesTrust/actions/workflows/pages.yml) for the deployment URL.
 
-1. Commit and push these new files to the existing branch `evertrust_main`.
-2. Open `https://github.com/TuanKhai1210/evertrust/settings/pages`.
-3. Under **Build and deployment → Source**, choose **GitHub Actions**.
-4. Go to **Actions → Deploy EverTrust GitHub Pages**. Select **Run workflow** on `evertrust_main` if the initial deployment did not start when you pushed.
-5. Once deployment succeeds, visit `https://tuankhai1210.github.io/evertrust/` (the expected default URL; confirm it in Settings → Pages).
-
-The existing `.github/workflows/ci.yml` continues to run the application checks independently. No `gh-pages` branch is required. If GitHub Pages environment rules block `evertrust_main`, ask a repository administrator to allow that branch in **Settings → Environments → github-pages**.
+The `github-pages` environment must allow `main`. Manual dispatch is supported on `main`; pull requests validate without deploying. No `gh-pages` branch or Jekyll build is needed.
 
 ## Local preview
 
-From the repository root, run a static file server in the `docs/` directory (using Python if available):
-
-```powershell
-cd docs
-python -m http.server 8000
+```sh
+npm run build:pages
+python -m http.server 8000 --directory out-pages
 ```
 
-Open `http://localhost:8000`. This previews only the marketing/overview page. It cannot sign users into TideCloak or access the real app's server endpoints.
+Open http://localhost:8000. The build uses only Node's standard library and works without `npm ci`. It checks local links, assets, anchors and JavaScript syntax, then creates `out-pages/` from an explicit allowlist. Guides, configuration, databases and application source are excluded.
 
-## Tide MCP for development (not for GitHub Pages runtime)
+Assets use relative URLs, supporting `/MilestonesTrust/` without Next.js base-path configuration.
 
-The `.mcp.json` file follows Tide's official Raziel MCP example:
+## Website files
 
-```json
-{
-  "mcpServers": {
-    "tide-pack": {
-      "command": "npx",
-      "args": ["-y", "@tideorg/mcp"]
-    }
-  }
-}
-```
+| Path | Purpose |
+| --- | --- |
+| `docs/index.html` | Overview and walkthrough markup |
+| `docs/site.css` | Responsive visual design |
+| `docs/site.js` | Prepared illustrative story steps |
+| `docs/mark.svg` | Site icon |
+| `docs/tide-simulation.png` | Local application screenshot |
+| `scripts/build-pages.mjs` | Validates and packages the website |
+| `.github/workflows/pages.yml` | PR validation and main deployment |
 
-Open the repository in a compatible MCP-enabled agent and enable its project configuration. MCP availability depends on the client. Raziel helps **plan** an integration; it does not automatically grant live authentication, enroll accounts, or prove QEA. Do not commit tokens, passwords or `config/tidecloak.json`.
+Walkthrough buttons navigate prepared synthetic examples. Reload resets them. Run the Node.js app to exercise server rules and persistence.
 
-## Submission honesty checklist
+## Troubleshooting
 
-- Clearly distinguish the static website from the running Node.js demo.
-- Label synthetic identities, synthetic evidence and simulated payments as such.
-- Keep live TideCloak/QEA marked **unverified** until real checks pass.
-- Record the official demonstration separately; GitHub Pages is not a substitute for the competition submission form.
+- **Workflow never starts:** confirm the default branch and trigger are both `main`.
+- **Configure Pages fails:** select **GitHub Actions** in Pages settings.
+- **Deployment blocked:** allow `main` in the environment's deployment branch policies.
+- **Missing assets:** use relative URLs and run `npm run build:pages`.
+- **Old version:** check the deployed commit in Actions before refreshing.
+
+The repository's `.mcp.json` configures Raziel MCP for development. It is not a website dependency and does not configure a live realm, enroll accounts or enable QEA.
 
 ## References
 
-- [GitHub Pages — custom workflows](https://docs.github.com/en/pages/getting-started-with-github-pages/using-custom-workflows-with-github-pages)
-- [GitHub Pages — publishing source](https://docs.github.com/en/pages/getting-started-with-github-pages/configuring-a-publishing-source-for-your-github-pages-site)
-- [Tide Raziel MCP configuration](https://github.com/tide-foundation/raziel-mcp)
+- [GitHub Pages custom workflows](https://docs.github.com/en/pages/getting-started-with-github-pages/using-custom-workflows-with-github-pages)
+- [Configuring the publishing source](https://docs.github.com/en/pages/getting-started-with-github-pages/configuring-a-publishing-source-for-your-github-pages-site)

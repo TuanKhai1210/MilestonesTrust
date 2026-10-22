@@ -3,27 +3,126 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <meta name="theme-color" content="#101b21">
-  <meta name="description" content="EverTrust is a milestone-based humanitarian funding prototype with independent approvals and planned TideCloak-governed identity changes.">
+  <meta name="theme-color" content="#173f35">
+  <meta name="description" content="MilestoneTrust connects community funding to independent review and verified delivery. Explore our RMIT Hackathon 2026 prototype.">
   <meta property="og:type" content="website">
-  <meta property="og:title" content="EverTrust · Progress with proof">
-  <meta property="og:description" content="Accountable relief funding, milestone by milestone. A public project overview for RMIT Hackathon 2026.">
-  <title>EverTrust — Progress with proof</title>
-  <style>
-    :root{color-scheme:dark;--bg:#101b21;--bg2:#15252a;--panel:#1b3034;--ink:#edf3eb;--muted:#adc1ba;--accent:#ceee9f;--line:rgba(213,242,221,.16);--width:1120px}
-    *{box-sizing:border-box}html{scroll-behavior:smooth}body{margin:0;background:var(--bg);color:var(--ink);font-family:Inter,ui-sans-serif,system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;line-height:1.6}a{color:inherit}a:focus-visible{outline:3px solid var(--accent);outline-offset:4px;border-radius:4px}.wrap{width:min(calc(100% - 44px),var(--width));margin:auto}.top{border-bottom:1px solid var(--line)}.nav{min-height:76px;display:flex;align-items:center;justify-content:space-between;gap:20px}.logo{font-weight:800;letter-spacing:-.04em;font-size:1.5rem;text-decoration:none}.logo-mark{display:inline-flex;align-items:center;justify-content:center;vertical-align:middle;width:34px;height:34px;margin-right:10px;border-radius:11px;color:var(--bg);background:var(--accent)}.nav-links{display:flex;gap:26px;align-items:center}.nav-links a{font-size:.89rem;text-decoration:none;color:var(--muted)}.nav-links a:hover{color:var(--ink)}.pill{display:inline-block;padding:6px 12px;background:rgba(206,238,159,.12);border:1px solid rgba(206,238,159,.35);color:var(--accent);font-size:.75rem;font-weight:700;letter-spacing:.08em;border-radius:40px}.hero{display:grid;grid-template-columns:1.2fr .8fr;align-items:center;gap:42px;padding:90px 0 72px}.hero h1{font-size:clamp(2.9rem,6.6vw,5.7rem);line-height:1.04;letter-spacing:-.075em;margin:22px 0 22px;max-width:790px}.hero h1 em{font-style:normal;color:var(--accent)}.lead{font-size:1.1rem;color:var(--muted);max-width:620px}.actions{display:flex;flex-wrap:wrap;gap:12px;margin-top:29px}.btn{padding:13px 18px;display:inline-flex;align-items:center;justify-content:center;text-decoration:none;border-radius:12px;font-size:.91rem;font-weight:700;border:1px solid var(--line)}.btn-primary{color:#122322;background:var(--accent);border-color:var(--accent)}.btn-secondary{color:var(--ink);background:rgba(255,255,255,.04)}.btn:hover{transform:translateY(-1px)}.hero-art{position:relative;min-height:360px;display:grid;place-items:center;border:1px solid var(--line);border-radius:28px;overflow:hidden;background:radial-gradient(circle at 52% 45%,#32584e,#20383a 45%,#16272a 75%)}.art-ring{position:absolute;border:1px solid rgba(206,238,159,.17);border-radius:50%;width:320px;height:320px}.art-ring:nth-child(2){width:220px;height:220px}.art-center{position:relative;width:104px;height:104px;display:grid;place-items:center;border-radius:28px;background:var(--accent);color:#17322b;font-size:54px;font-weight:800;box-shadow:0 0 0 22px rgba(206,238,159,.08)}.art-label{position:absolute;bottom:20px;left:24px;font-size:.72rem;color:var(--muted);letter-spacing:.08em;text-transform:uppercase}.section{padding:60px 0}.section-head{margin-bottom:26px}.eyebrow{font-size:.75rem;color:var(--accent);letter-spacing:.13em;text-transform:uppercase;font-weight:800}.section h2{font-size:clamp(1.9rem,3.7vw,3rem);line-height:1.15;letter-spacing:-.05em;margin:8px 0}.intro{color:var(--muted);max-width:720px;margin:0}.grid{display:grid;grid-template-columns:repeat(3,1fr);gap:16px}.tile{border:1px solid var(--line);background:var(--bg2);border-radius:20px;padding:27px;min-height:230px}.tile-num{font-size:.77rem;color:var(--accent);font-weight:800}.tile h3{font-size:1.25rem;letter-spacing:-.03em;margin:22px 0 9px}.tile p{color:var(--muted);font-size:.92rem;margin:0}.process{margin:24px 0 0;padding:0;list-style:none;display:grid;grid-template-columns:repeat(5,1fr);gap:10px}.process li{padding:15px 12px;background:#223d3d;border:1px solid var(--line);border-radius:12px;font-size:.85rem;font-weight:700;text-align:center}.process li span{display:block;color:var(--accent);font-size:.7rem;margin-bottom:7px}.preview{display:grid;grid-template-columns:1fr .9fr;gap:30px;align-items:center;border:1px solid var(--line);background:#192b30;border-radius:25px;padding:28px}.preview img{width:100%;display:block;height:auto;border:1px solid var(--line);border-radius:12px}.preview p{color:var(--muted)}.caution{border-left:3px solid var(--accent);padding-left:17px;font-size:.91rem}.facts{display:flex;gap:18px;flex-wrap:wrap;margin-top:22px;color:var(--muted);font-size:.9rem}.facts strong{color:var(--ink)}.footer{border-top:1px solid var(--line);padding:28px 0 38px;display:flex;justify-content:space-between;gap:20px;color:var(--muted);font-size:.82rem}.footer a{color:var(--ink)}
-    @media (max-width:850px){.hero{grid-template-columns:1fr;padding:55px 0}.hero-art{min-height:245px}.grid{grid-template-columns:1fr}.tile{min-height:auto}.preview{grid-template-columns:1fr}.process{grid-template-columns:repeat(2,1fr)}.nav-links{gap:12px}}@media(max-width:520px){.wrap{width:min(calc(100% - 30px),var(--width))}.nav{min-height:66px}.nav-links a:first-child{display:none}.hero h1{font-size:3rem}.process{grid-template-columns:1fr}.footer{flex-direction:column}.section{padding:40px 0}}
-    @media(prefers-reduced-motion:reduce){html{scroll-behavior:auto}.btn:hover{transform:none}}
-  </style>
+  <meta property="og:title" content="MilestoneTrust — Progress with proof">
+  <meta property="og:description" content="Relief funding, one accountable milestone at a time. Explore the prototype and its funding workflow.">
+  <meta property="og:url" content="https://tuankhai1210.github.io/MilestonesTrust/">
+  <meta property="og:image" content="https://tuankhai1210.github.io/MilestonesTrust/tide-simulation.png">
+  <title>MilestoneTrust — Progress with proof</title>
+  <link rel="icon" href="./mark.svg" type="image/svg+xml">
+  <link rel="stylesheet" href="./site.css">
+  <script src="./site.js" defer></script>
 </head>
 <body>
-  <header class="top"><div class="wrap nav"><a class="logo" href="./" aria-label="EverTrust home"><span class="logo-mark">E</span>EverTrust</a><nav class="nav-links" aria-label="Main navigation"><a href="#how-it-works">How it works</a><a href="#architecture">Security boundaries</a><a href="https://github.com/TuanKhai1210/evertrust" target="_blank" rel="noopener noreferrer">GitHub ↗</a></nav></div></header>
-  <main>
-    <section class="hero wrap" aria-labelledby="hero-title"><div><span class="pill">RMIT HACKATHON 2026 · CHALLENGE 2</span><h1 id="hero-title">Relief funding.<br><em>Progress with proof.</em></h1><p class="lead">EverTrust is a prototype for milestone-based humanitarian funding. Independent reviewers approve each request, and verified delivery unlocks the next stage.</p><div class="actions"><a class="btn btn-primary" href="https://github.com/TuanKhai1210/evertrust#run-the-local-demonstration">Run the local demo ↗</a><a class="btn btn-secondary" href="https://github.com/TuanKhai1210/evertrust">View source code ↗</a></div></div><div class="hero-art" role="img" aria-label="Concentric circles around an EverTrust E symbol, representing shared oversight"><div class="art-ring"></div><div class="art-ring"></div><div class="art-center">E</div><div class="art-label">Shared responsibility · accountable progress</div></div></section>
-    <section class="section" id="how-it-works"><div class="wrap"><div class="section-head"><span class="eyebrow">The funding model</span><h2>One mission. Independent decisions.</h2><p class="intro">The demonstration uses a synthetic 100 million VND clean-water campaign across three milestones. There are no real donations or bank payments.</p></div><div class="grid"><article class="tile"><span class="tile-num">01 / REQUEST</span><h3>Funding is requested in stages.</h3><p>A project team records the recipient, purpose, and fixed allocation for a milestone.</p></article><article class="tile"><span class="tile-num">02 / APPROVE</span><h3>Two separate people review.</h3><p>A sponsor and an independent auditor must approve the same version. A changed request requires fresh approvals.</p></article><article class="tile"><span class="tile-num">03 / VERIFY</span><h3>Proof unlocks progress.</h3><p>After a simulated release, the project submits delivery evidence for auditor review before the next milestone opens.</p></article></div><ol class="process" aria-label="Funding workflow"><li><span>STEP 1</span>Request</li><li><span>STEP 2</span>Sponsor review</li><li><span>STEP 3</span>Auditor review</li><li><span>STEP 4</span>Simulated payment</li><li><span>STEP 5</span>Verify outcome</li></ol></div></section>
-    <section class="section" id="architecture"><div class="wrap"><div class="section-head"><span class="eyebrow">Security boundaries</span><h2>Two kinds of approval. Different responsibilities.</h2></div><div class="grid"><article class="tile"><span class="tile-num">APPLICATION LAYER</span><h3>Business approvals</h3><p>EverTrust’s server checks membership, funding rules, independent reviewers, request versions, and duplicate simulated payments.</p></article><article class="tile"><span class="tile-num">IDENTITY LAYER</span><h3>TideCloak integration</h3><p>The application supports TideCloak authentication and token verification. Live QEA for protected identity changes still requires realm configuration and verification.</p></article><article class="tile"><span class="tile-num">PROTOTYPE LIMIT</span><h3>No real fund custody</h3><p>SQLite stores demonstration records. The audit trail is not immutable; QEA does not cryptographically approve payments in this prototype.</p></article></div><p class="caution" style="margin-top:22px"><strong>Transparency notice:</strong> The local demo uses simulated identities, not verified live TideCloak authentication. No real payments occur. This website is a static project overview, not the operational app.</p></div></section>
-    <section class="section" id="preview"><div class="wrap preview"><div><span class="eyebrow">Prototype snapshot</span><h2>See the workflow.</h2><p>The image at right is an <strong>earlier</strong> local demo screenshot, captured with simulated roles. The repository includes a newer five-tab frontend; this image is not a screenshot of its current live login experience.</p><a class="btn btn-secondary" href="https://github.com/TuanKhai1210/evertrust/blob/evertrust_main/docs/CHAY_DEMO_VI.md">Read demo steps ↗</a><div class="facts"><span><strong>3</strong> milestones</span><span><strong>2</strong> approvals per request</span><span><strong>0</strong> real transfers</span></div></div><a href="workspace.png" aria-label="Open historical workspace screenshot"><img src="workspace.png" alt="Earlier EverTrust workspace screenshot showing a synthetic milestone funding demo" loading="lazy"></a></div></section>
+  <a class="skip-link" href="#main">Skip to content</a>
+  <header class="header">
+    <div class="wrap nav">
+      <a class="brand" href="./" aria-label="MilestoneTrust home"><img src="./mark.svg" alt="" width="36" height="36">MilestoneTrust<span class="brand-dot">.</span></a>
+      <nav aria-label="Main navigation">
+        <a href="#how-it-works">The idea</a>
+        <a href="#walkthrough">Walkthrough</a>
+        <a href="#build">The build</a>
+      </nav>
+      <a class="nav-source" href="https://github.com/TuanKhai1210/MilestonesTrust">Source code <span aria-hidden="true">↗</span></a>
+    </div>
+  </header>
+  <main id="main">
+    <section class="hero wrap" aria-labelledby="hero-title">
+      <div class="hero-copy">
+        <p class="eyebrow"><span class="small-dot"></span> RMIT HACKATHON 2026 / TIDE UNLOCKED</p>
+        <h1 id="hero-title">Relief funding.<br>Progress<br><em>with proof.</em></h1>
+        <p class="lead">Help communities move forward. Release funding in stages, with independent decisions and evidence that the work is done.</p>
+        <div class="actions">
+          <a class="button primary" href="#walkthrough">Explore the workflow <span aria-hidden="true">↗</span></a>
+          <a class="text-link" href="https://github.com/TuanKhai1210/MilestonesTrust#explore-or-run">Run the prototype <span aria-hidden="true">→</span></a>
+        </div>
+        <p class="hero-note">A community-funding prototype built around shared responsibility.</p>
+      </div>
+      <div class="campaign-board">
+        <div class="board-top"><span class="mono">CAMPAIGN / CWF-001</span><span class="board-pill">Synthetic campaign</span></div>
+        <div class="water-symbol" aria-hidden="true"><svg viewBox="0 0 56 56" fill="none"><path d="M28 7C23 16 12 27 12 35a16 16 0 0 0 32 0C44 27 33 16 28 7Z" stroke="currentColor" stroke-width="2"/><path d="m21 35 5 5 10-11" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg></div>
+        <h2>Clean water for<br>flood communities.</h2>
+        <p class="board-subtitle">One mission. Three accountable milestones.</p>
+        <div class="board-budget"><span>Committed allocation</span><strong>100,000,000 <small>VND</small></strong></div>
+        <ol class="milestone-list">
+          <li><span class="stage-num">01</span><div><strong>Pilot deployment</strong><span>20M VND · Start small, learn fast</span></div><span class="mini-state open">First stage</span></li>
+          <li><span class="stage-num">02</span><div><strong>Community expansion</strong><span>30M VND · Build on verified delivery</span></div><span class="mini-state">Locked</span></li>
+          <li><span class="stage-num">03</span><div><strong>Final installation</strong><span>50M VND · Complete the mission</span></div><span class="mini-state">Locked</span></li>
+        </ol>
+        <div class="board-foot"><span class="small-dot"></span> Every release needs a sponsor + an independent auditor.</div>
+      </div>
+    </section>
+    <div class="wrap facts" aria-label="Prototype facts">
+      <div><strong>100M <small>VND</small></strong><span>Synthetic campaign allocation</span></div>
+      <div><strong>3</strong><span>Sequential milestones</span></div>
+      <div><strong>2</strong><span>Independent approvals per release</span></div>
+      <div><strong>0</strong><span>Real money transferred</span></div>
+    </div>
+    <section class="section wrap" id="how-it-works" aria-labelledby="idea-title">
+      <div class="section-heading"><p class="eyebrow">01 / THE IDEA</p><h2 id="idea-title">Good intentions deserve<br>a better funding model.</h2><p>Community teams need room to act. Sponsors need visibility. Independent auditors need a meaningful say in what happens next.</p></div>
+      <div class="principles">
+        <article><span class="card-index">01 — REQUEST</span><h3>A plan before a payment.</h3><p>The team names the recipient, purpose and milestone. Everyone reviews the same request.</p></article>
+        <article><span class="card-index">02 — REVIEW</span><h3>Shared decisions.</h3><p>A sponsor and a separate auditor approve independently. Change the request, and both must review again.</p></article>
+        <article><span class="card-index">03 — VERIFY</span><h3>Progress earns the next stage.</h3><p>Delivery evidence gets reviewed before the next allocation opens. An open stage still needs a new request.</p></article>
+      </div>
+    </section>
+    <section class="walkthrough-section" id="walkthrough" aria-labelledby="walkthrough-title">
+      <div class="wrap">
+        <div class="section-heading light"><p class="eyebrow">02 / FOLLOW THE FUNDING</p><h2 id="walkthrough-title">From a request<br>to verified progress.</h2><p>Step through one pilot allocation. These prepared examples illustrate the workflow; they do not execute payments or authenticate accounts.</p></div>
+        <div class="story">
+          <div class="story-narrative">
+            <p class="role-label">IN THE WORKFLOW <span id="story-role">Project team</span></p>
+            <h3 id="story-title">A clear plan comes first.</h3>
+            <p id="story-detail">The pilot allocation is ready. The team prepares a request for 20 million VND of water filters.</p>
+            <div id="story-controls" hidden>
+              <div class="story-steps" role="group" aria-label="Choose a walkthrough step">
+                <button type="button" data-step="0" aria-label="Step 1: Prepare" aria-pressed="true" class="active">1</button>
+                <button type="button" data-step="1" aria-label="Step 2: Request" aria-pressed="false">2</button>
+                <button type="button" data-step="2" aria-label="Step 3: Sponsor review" aria-pressed="false">3</button>
+                <button type="button" data-step="3" aria-label="Step 4: Auditor review" aria-pressed="false">4</button>
+                <button type="button" data-step="4" aria-label="Step 5: Mock release" aria-pressed="false">5</button>
+                <button type="button" data-step="5" aria-label="Step 6: Verify delivery" aria-pressed="false">6</button>
+              </div>
+              <div class="story-navigation"><button id="story-prev" class="button dark-button" type="button" disabled>← Previous</button><span id="story-counter" class="mono">1 / 6</span><button id="story-next" class="button lime-button" type="button">Next step →</button></div>
+              <button id="story-reset" class="reset-link" type="button">Restart walkthrough</button>
+            </div>
+            <noscript><p>Enable JavaScript for the interactive walkthrough, or read the complete workflow in the repository.</p></noscript>
+          </div>
+          <div class="story-panel">
+            <div class="story-panel-top"><span class="mono">PILOT DEPLOYMENT / M1</span><span class="status-badge" id="story-status">Eligible</span></div>
+            <div class="allocation"><span>Milestone allocation</span><strong>20,000,000 <small>VND</small></strong></div>
+            <div class="approval-header"><strong>Independent reviews</strong><span id="story-approvals">0 / 2</span></div>
+            <div class="reviewer"><span class="avatar">S</span><span>Sponsor</span><span id="sponsor-review" class="review-state">Awaiting review</span></div>
+            <div class="reviewer"><span class="avatar">A</span><span>Independent auditor</span><span id="auditor-review" class="review-state">Awaiting review</span></div>
+            <div class="story-metrics"><div><span>Mock payment</span><strong id="story-payment">Locked</strong></div><div><span>Released / M VND</span><strong id="story-released">0</strong></div><div><span>Next milestone</span><strong id="story-next-milestone">Locked</strong></div></div>
+            <div class="story-event"><span class="small-dot"></span><span id="story-event">Campaign prepared · 100M VND across 3 stages</span></div>
+            <div class="progress-track" aria-hidden="true"><div id="story-progress"></div></div>
+          </div>
+        </div>
+        <p class="preview-caption">ILLUSTRATIVE PREVIEW · SYNTHETIC DATA · NO REAL TRANSFERS</p>
+        <p id="story-announcement" class="sr-only" aria-live="polite" aria-atomic="true"></p>
+      </div>
+    </section>
+    <section class="section wrap" id="build" aria-labelledby="build-title">
+      <div class="section-heading"><p class="eyebrow">03 / INSIDE THE PROTOTYPE</p><h2 id="build-title">A working flow.<br>Clear responsibilities.</h2><p>The local application brings requests, reviews, mock releases and delivery evidence into one workspace.</p></div>
+      <figure class="app-preview"><div class="window-bar"><span aria-hidden="true">● ● ●</span><span>MilestoneTrust / Local application</span><span class="preview-tag">SIMULATED SIGN-IN</span></div><a href="./tide-simulation.png" aria-label="Open full local application screenshot"><img src="./tide-simulation.png" alt="Local MilestoneTrust workspace showing the simulated auditor account, identity governance and role eligibility" width="1440" height="1000" loading="lazy"></a><figcaption>Local application with a simulated auditor account. Live TideCloak login and QEA remain unverified.</figcaption></figure>
+      <div class="build-grid">
+        <article><span class="eyebrow">APPLICATION</span><h3>Rules enforced on the server.</h3><p>The Next.js API checks membership, roles, independent reviewers and request versions. SQLite stores the campaign, approvals and mock payments.</p><a class="text-link" href="https://github.com/TuanKhai1210/MilestonesTrust/blob/main/docs/VERIFICATION.md">View verification evidence →</a></article>
+        <article><span class="eyebrow">IDENTITY &amp; GOVERNANCE</span><h3>A role for TideCloak.</h3><p>The app integrates login and token verification. A configured Tide realm can govern protected identity changes through QEA. Live verification is the next integration step.</p><a class="text-link" href="https://github.com/TuanKhai1210/MilestonesTrust/blob/main/docs/TIDE_INTEGRATION_PLAN.md">Read the integration plan →</a></article>
+      </div>
+      <details class="boundaries"><summary>Prototype scope and trust boundaries</summary><p>All campaign records, identities in demo mode and funds are synthetic. QEA governs identity changes, not these payment records. The application server and SQLite remain trusted; the audit log is not immutable. Real bank integration, complete DPoP verification and live realm login/QEA are not demonstrated here.</p></details>
+    </section>
+    <section class="wrap start-section" id="get-started" aria-labelledby="start-title">
+      <div><p class="eyebrow">EXPLORE THE CODE</p><h2 id="start-title">Try the full experience.</h2><p>Run the application locally with Node.js 24+.<br>Use the demo accounts to follow the complete flow.</p><div class="actions"><a class="button primary" href="https://github.com/TuanKhai1210/MilestonesTrust/blob/main/docs/SETUP.md">Setup guide <span aria-hidden="true">↗</span></a><a class="text-link" href="https://github.com/TuanKhai1210/MilestonesTrust">View repository →</a></div></div>
+      <div class="terminal"><div><span class="mono">QUICK START</span><span class="terminal-dots" aria-hidden="true">● ● ●</span></div><pre><code><span class="comment"># Inside the cloned repository</span>
+npm ci
+npm run demo
+
+<span class="comment"># Open http://localhost:3000</span></code></pre><p>Local simulated identities · No Tide account needed</p></div>
+    </section>
   </main>
-  <footer class="footer wrap"><span>EverTrust · RMIT Hackathon 2026 · Educational prototype</span><span><a href="https://github.com/TuanKhai1210/evertrust">Source</a> · <a href="https://github.com/TuanKhai1210/evertrust/blob/evertrust_main/docs/TIDECLOAK_SETUP.md">TideCloak setup</a> · <a href="https://tide.org/unlocked/#challenge">Challenge</a></span></footer>
+  <footer class="wrap footer"><div><a class="brand" href="./"><img src="./mark.svg" alt="" width="28" height="28">MilestoneTrust<span class="brand-dot">.</span></a><p>Progress with proof. Responsibility shared.</p></div><div class="footer-links"><a href="https://github.com/TuanKhai1210/MilestonesTrust">GitHub ↗</a><a href="https://tide.org/unlocked/#challenge">Tide UNLOCKED ↗</a><span>RMIT Hackathon 2026 · MIT License</span></div></footer>
 </body>
 </html>
