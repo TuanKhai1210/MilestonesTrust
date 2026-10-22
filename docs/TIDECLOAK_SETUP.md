@@ -4,6 +4,8 @@ This guide is the remaining live integration work. Local demo success is not a l
 
 ## 1. Start or obtain a TideCloak server
 
+On the Windows development machine, Docker installation is currently blocked by a disabled VirtualMachinePlatform feature and a WSL registration error. Follow [the Windows setup steps](WINDOWS_SETUP_VI.md) first. This requires a user-run Administrator step and may require a restart; the app's demo mode does not satisfy this prerequisite.
+
 If Docker Desktop is installed and running, from PowerShell:
 
 ```powershell
