@@ -5,7 +5,7 @@ Performed on 22 October 2026, Windows, Node.js 24.18.0, Next.js 16.4.2 and TideC
 | Check | Result |
 |---|---|
 | TypeScript strict check | Passed |
-| Automated tests | 20 passed |
+| Automated tests | 24 passed |
 | Optimized production build | Passed |
 | Production `/api/state` without adapter | 200; public synthetic records, Tide mode, configured=false |
 | Forged demo header against production action API | 503; no fallback to demo identities |
@@ -26,6 +26,12 @@ The two-minute MP4 is not included. This snapshot does not imply the hackathon s
 `npm run demo:fresh` was launched and checked over HTTP: `/api/state` returned 200 in explicit demo mode, zero requests/payments, M1 ELIGIBLE and M2/M3 LOCKED. A simulated platform-admin write returned 403. The command creates a separate SQLite file and retains earlier runs. See [the Vietnamese rehearsal guide](CHAY_DEMO_VI.md).
 
 The new fresh session has not received another browser walkthrough. The Edge automation extension requested an update before it could open the demo tab. The earlier browser walkthrough and screenshot above remain the visual evidence; the new checks are HTTP, route-handler and signed-fixture checks.
+
+## Frontend PR integration
+
+The five-tab frontend now reads the existing `/api/state` and submits the established `/api/actions` contract. Removed the automatic local-success fallback on missing endpoints. Live authentication retains the official TideCloak provider and server-verified bearer token; demo identity switching and abuse probes are restricted to explicit local demo mode. Approval, payment and verification controls use the active actor. Governance reports pending live verification rather than invented QEA events. Public approval/audit records do not disclose actor subjects; the UI does not invent them.
+
+TypeScript, all 24 automated tests and the optimized build passed locally. Four frontend regression tests cover mapping actual persisted revisions/payments/evidence, failed API responses, visitor/non-member role boundaries, and live UI without demo switching. The new frontend has not had a full browser walkthrough; the older screenshot is retained as historical evidence only. Live Tide authentication and QEA remain unverified.
 
 ## Live setup attempt on Windows
 

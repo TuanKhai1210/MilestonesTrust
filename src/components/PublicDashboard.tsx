@@ -320,7 +320,7 @@ export default function PublicDashboard({
           </h3>
           <p className="text-xs text-slate-600 mt-1.5 leading-relaxed">
             The 100M ₫ grant is divided into M1 (20M), M2 (30M), and M3 (50M). Later stages
-            remain cryptographically & logically locked until prior stage proof is verified.
+            remain locked by application rules until prior stage proof is verified.
           </p>
         </div>
 
@@ -334,7 +334,7 @@ export default function PublicDashboard({
           <p className="text-xs text-slate-600 mt-1.5 leading-relaxed">
             Both the <strong>Sponsor</strong> and an <strong>Independent Auditor</strong>{' '}
             must approve the exact canonical <code className="font-mono text-slate-800">requestHash</code>.
-            Editing the amount invalidates prior approvals (Policy R7).
+            Editing recipient or purpose invalidates prior approvals (Policy R7). Allocations are fixed in this MVP.
           </p>
         </div>
 
@@ -346,9 +346,9 @@ export default function PublicDashboard({
             3. TideCloak Protected Governance
           </h3>
           <p className="text-xs text-slate-600 mt-1.5 leading-relaxed">
-            Sensitive role assignments are protected by TideCloak QEA (2-of-3{' '}
-            <code className="font-mono text-slate-800">tide-realm-admin</code> quorum),
-            preventing a rogue admin from self-assigning the Sponsor role.
+            Planned: protect sensitive role assignments with TideCloak QEA (2-of-3{' '}
+            <code className="font-mono text-slate-800">tide-realm-admin</code> quorum).
+            Live enrollment, protected role changes and fresh-token verification are still pending.
           </p>
         </div>
       </section>

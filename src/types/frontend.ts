@@ -27,7 +27,7 @@ export interface AuthenticatedUser {
   displayName: string;
   roles: BusinessRole[];
   realmRoles?: string[];
-  authSource: 'TIDECLOAK_JWT' | 'DEMO_SIMULATOR_ADAPTER';
+  authSource: 'TIDECLOAK_JWT' | 'DEMO_SIMULATOR_ADAPTER' | 'PUBLIC_VIEW';
 }
 
 export interface Approval {

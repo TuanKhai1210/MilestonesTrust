@@ -18,7 +18,8 @@ import { AuthenticatedUser, CampaignState } from '../types/frontend';
 interface ApprovalCenterProps {
   campaign: CampaignState;
   currentUser: AuthenticatedUser;
-  onApproveRequest: (requestId: string, requestHash: string) => Promise<void>;
+  onApproveRequest: (requestId: string, requestHash: string, role?: 'SPONSOR' | 'AUDITOR') => Promise<void>;
+  allowDemoSwitch: boolean;
   onExecutePayment: (requestId: string) => Promise<void>;
   onVerifyEvidence: (milestoneId: string) => Promise<void>;
   onSwitchActorAndApprove: (
@@ -37,6 +38,7 @@ export default function ApprovalCenter({
   onVerifyEvidence,
   onSwitchActorAndApprove,
   isSubmitting,
+  allowDemoSwitch,
 }: ApprovalCenterProps) {
   return (
     <div className="space-y-8 font-sans">
@@ -51,7 +53,7 @@ export default function ApprovalCenter({
             Disbursement Approval Center
           </h2>
           <p className="text-sm text-zinc-400 max-w-2xl leading-relaxed">
-            Hệ thống yêu cầu phê duyệt đa chữ ký. Cần hai chủ thể độc lập (<code className="font-mono text-emerald-300 bg-emerald-400/10 px-1.5 py-0.5 rounded">SPONSOR</code> + <code className="font-mono text-teal-300 bg-teal-400/10 px-1.5 py-0.5 rounded">AUDITOR</code>) xác nhận cùng một <code className="font-mono text-zinc-300 bg-zinc-800 px-1.5 py-0.5 rounded">requestHash</code> trước khi giải ngân.
+            Cần hai chủ thể độc lập (<code className="font-mono text-emerald-300 bg-emerald-400/10 px-1.5 py-0.5 rounded">SPONSOR</code> + <code className="font-mono text-teal-300 bg-teal-400/10 px-1.5 py-0.5 rounded">AUDITOR</code>) phê duyệt cùng một <code className="font-mono text-zinc-300 bg-zinc-800 px-1.5 py-0.5 rounded">requestHash</code>. Phê duyệt được lưu trên server; không phải chữ ký mật mã riêng của người dùng.
           </p>
         </div>
 
@@ -154,7 +156,7 @@ export default function ApprovalCenter({
                           : 'bg-amber-500/10 text-amber-400 border-amber-500/20'
                       }`}
                     >
-                      {approvalCount} / 2 Signatures
+                      {approvalCount} / 2 Approvals
                     </span>
                   </div>
 
@@ -191,7 +193,7 @@ export default function ApprovalCenter({
                               : 'bg-zinc-800 text-zinc-500 border-zinc-700'
                           }`}
                         >
-                          {sponsorApproval ? 'Verified' : 'Awaiting'}
+                          {sponsorApproval ? 'Recorded' : 'Awaiting'}
                         </span>
                       </div>
 
@@ -206,8 +208,8 @@ export default function ApprovalCenter({
                             Cần tài khoản quyền SPONSOR
                           </span>
                           <button
-                            disabled={isSubmitting}
-                            onClick={() => onSwitchActorAndApprove('sponsor_01', req.id, req.requestHash)}
+                            disabled={isSubmitting || !currentUser.roles.includes('SPONSOR') || req.status !== 'PENDING_APPROVAL'}
+                            onClick={() => onApproveRequest(req.id, req.requestHash, 'SPONSOR')}
                             className="text-xs font-bold bg-emerald-600 hover:bg-emerald-500 text-white px-4 py-2 rounded-xl transition-all shadow-lg shadow-emerald-900/20 active:scale-95 disabled:opacity-50 disabled:cursor-not-allowed"
                           >
                             Duyệt (Sponsor)
@@ -240,7 +242,7 @@ export default function ApprovalCenter({
                               : 'bg-zinc-800 text-zinc-500 border-zinc-700'
                           }`}
                         >
-                          {auditorApproval ? 'Verified' : 'Awaiting'}
+                          {auditorApproval ? 'Recorded' : 'Awaiting'}
                         </span>
                       </div>
 
@@ -255,8 +257,8 @@ export default function ApprovalCenter({
                             Cần tài khoản quyền AUDITOR
                           </span>
                           <button
-                            disabled={isSubmitting}
-                            onClick={() => onSwitchActorAndApprove('auditor_01', req.id, req.requestHash)}
+                            disabled={isSubmitting || !currentUser.roles.includes('AUDITOR') || req.status !== 'PENDING_APPROVAL'}
+                            onClick={() => onApproveRequest(req.id, req.requestHash, 'AUDITOR')}
                             className="text-xs font-bold bg-teal-600 hover:bg-teal-500 text-white px-4 py-2 rounded-xl transition-all shadow-lg shadow-teal-900/20 active:scale-95 disabled:opacity-50 disabled:cursor-not-allowed"
                           >
                             Duyệt (Auditor)
@@ -300,7 +302,7 @@ export default function ApprovalCenter({
                           <span className="flex items-start gap-2.5 text-zinc-500">
                             <Lock className="w-4 h-4 text-zinc-600 shrink-0 mt-0.5" />
                             <span>
-                              Cổng thanh toán bị khóa. Yêu cầu đầy đủ chữ ký từ Sponsor và Auditor để mở khóa.
+                              Cổng thanh toán bị khóa. Yêu cầu phê duyệt từ Sponsor và Auditor để mở khóa.
                             </span>
                           </span>
                         )}
@@ -309,8 +311,13 @@ export default function ApprovalCenter({
                   </div>
 
                   <div className="space-y-3 pt-6">
+                    {milestone?.evidence && <div className="text-xs text-zinc-300 border border-zinc-700 rounded-xl p-3 space-y-2 break-words">
+                      <strong className="block">Submitted evidence · {milestone.evidence.invoiceCode}</strong>
+                      <p>{milestone.evidence.description}</p>
+                      {milestone.evidence.fileUrl && <a className="underline text-teal-300" href={milestone.evidence.fileUrl} target="_blank" rel="noreferrer">Open evidence reference</a>}
+                    </div>}
                     <button
-                      disabled={isSubmitting || (!isReadyToPay && !req.payment)}
+                      disabled={isSubmitting || !currentUser.roles.includes('SPONSOR') || !isReadyToPay || Boolean(req.payment)}
                       onClick={() => onExecutePayment(req.id)}
                       className={`w-full py-3.5 px-4 rounded-2xl font-bold text-xs sm:text-sm flex items-center justify-center gap-2 transition-all duration-200 ${
                         isReadyToPay
@@ -330,7 +337,7 @@ export default function ApprovalCenter({
 
                     {milestone && milestone.status === 'DISBURSED' && (
                       <button
-                        disabled={isSubmitting}
+                        disabled={isSubmitting || !currentUser.roles.includes('AUDITOR') || !milestone.evidence}
                         onClick={() => onVerifyEvidence(milestone.id)}
                         className="w-full py-3.5 px-4 rounded-2xl font-bold text-xs sm:text-sm flex items-center justify-center gap-2 bg-teal-600/20 hover:bg-teal-600/30 text-teal-400 border border-teal-500/30 transition-all active:scale-95"
                       >
@@ -343,10 +350,10 @@ export default function ApprovalCenter({
               </div>
 
               {/* Bottom Red-Team Abuse Simulator Strip */}
-              <div className="bg-rose-950/10 px-6 py-4 border-t border-rose-900/30 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+              {allowDemoSwitch && <div className="bg-rose-950/10 px-6 py-4 border-t border-rose-900/30 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
                 <div className="flex items-center gap-2.5 text-xs font-bold text-rose-400/80 uppercase tracking-wider">
                   <ShieldAlert className="w-4 h-4 text-rose-500" />
-                  <span>TideCloak Anti-Abuse Simulation</span>
+                  <span>Local demo — server policy checks</span>
                 </div>
                 <div className="flex flex-wrap gap-2.5">
                   <button
@@ -371,7 +378,7 @@ export default function ApprovalCenter({
                     [R7] Hash tamper
                   </button>
                 </div>
-              </div>
+              </div>}
             </div>
           );
         })}

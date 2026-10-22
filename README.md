@@ -14,11 +14,11 @@ Milestone-based relief funding with independent spending approvals and TideCloak
 
 **Prototype & storytelling.** The workspace demonstrates two-person approvals bound to a request version, replay-safe simulated payments, evidence verification and milestone sequencing. The governance view links to the real Tide Console for a pending-then-approved QEA demonstration after realm setup. All campaign records and funds are synthetic. No real transfer occurs.
 
-## Workspace preview
+## Earlier workspace preview
 
 ![Local demo after independent approvals and milestone verification](docs/workspace.png)
 
-This screenshot uses simulated local identities. It is not evidence of live Tide authentication or QEA.
+This screenshot shows the earlier workspace with simulated local identities. The current frontend has five tabs: Public Dashboard, Project Workspace, Approval Center, TideCloak & QEA, and Public Audit Trail. The screenshot is not evidence of live Tide authentication or QEA or a visual check of the new frontend.
 
 ## Run the local demonstration
 
@@ -33,12 +33,12 @@ Open **http://localhost:3000**. Select Project team, Sponsor, Independent audito
 
 For a clean rehearsal, stop the app and run `npm run demo:fresh`. This creates a separate database and preserves previous runs. A [Vietnamese walkthrough](docs/CHAY_DEMO_VI.md) includes exact buttons, expected results and failure cases.
 
-1. Team: request milestone 1 funding.
-2. Sponsor: approve. Release remains locked.
-3. Auditor: approve the same request.
-4. Sponsor: release simulated funds.
-5. Team: submit a short synthetic delivery note.
-6. Auditor: verify delivery. Milestone 2 opens, without an automatic payment.
+1. Team: create milestone 1 funding in **Project Workspace**.
+2. Sponsor: open **Approval Center** and approve. Release remains locked.
+3. Auditor: approve the same request in **Approval Center**.
+4. Sponsor: execute the mock payment in **Approval Center**.
+5. Team: submit a short synthetic delivery note in **Project Workspace**.
+6. Auditor: verify delivery in **Approval Center**. Milestone 2 opens, without an automatic payment.
 
 ## Connect live TideCloak
 
@@ -60,7 +60,9 @@ npm run build
 npm run doctor
 ```
 
-The 20 tests cover role and membership checks, self-approval, duplicate subjects, edits, stale approvals, payment idempotency and API input/origin validation through all three milestones. Signed ES256 fixtures exercise the official verifier against tampering, wrong keys, expired/not-yet-valid tokens, wrong issuer/client and malformed claims. These fixtures use generated local keys, not a live Tide realm.
+The 24 tests cover role and membership checks, self-approval, duplicate subjects, edits, stale approvals, payment idempotency and API input/origin validation through all three milestones. Frontend regression tests check persisted records, failed responses without local fallback, public-role boundaries, and the absence of demo switching in live UI. Signed ES256 fixtures exercise the official verifier against tampering, wrong keys, expired/not-yet-valid tokens, wrong issuer/client and malformed claims. These fixtures use generated local keys, not a live Tide realm.
+
+The frontend reads `/api/state` and writes only to `/api/actions`. Errors stay errors; there is no simulated-success fallback. Local identity switching and abuse probes appear only in explicit demo mode. Live mode uses the official TideCloak provider and bearer tokens. The governance tab reports live QEA verification as pending rather than generating fake pending requests or denial evidence.
 
 ## Architecture and limits
 

@@ -47,18 +47,19 @@ export default function ProjectWorkspace({
   const [evidenceMilestoneId, setEvidenceMilestoneId] = useState('M1');
   const [invoiceCode, setInvoiceCode] = useState('INV-2026-QB-040');
   const [evidenceDesc, setEvidenceDesc] = useState(
-    'Delivered and installed 40 ceramic water filtration units with signed commune handover certificate.'
+    'Synthetic demo: 40 ceramic water filtration units delivered and installed; review the prepared delivery note.'
   );
   const [fileUrl, setFileUrl] = useState(
-    'https://example.org/evidence/cwf001-m1-handover-signed.pdf'
+    ''
   );
 
   const isTeam = currentUser.roles.includes('PROJECT_TEAM');
 
   // Visual deterministic preview of the canonical string for UI transparency (Policy R7)
   const canonicalPreview = useMemo(() => {
-    return `campaign=${campaign.id}|milestone=${selectedMilestoneId}|amount=${amountVnd}|recipient=${recipientId.trim()}|version=next|policy=MILESTONE_TRUST_V${campaign.policyVersion}`;
-  }, [campaign.id, campaign.policyVersion, selectedMilestoneId, amountVnd, recipientId]);
+    const version = (campaign.requests.find(r => r.milestoneId === selectedMilestoneId)?.version || 0) + 1;
+    return JSON.stringify([campaign.id, selectedMilestoneId, amountVnd, recipientId.trim(), purpose.trim(), version, campaign.policyVersion]);
+  }, [campaign.id, campaign.policyVersion, campaign.requests, selectedMilestoneId, amountVnd, recipientId, purpose]);
 
   const handleSelectMilestone = (id: string) => {
     setSelectedMilestoneId(id);
@@ -187,6 +188,7 @@ export default function ProjectWorkspace({
                 </label>
                 <input
                   type="text"
+                  maxLength={100}
                   value={recipientId}
                   onChange={(e) => setRecipientId(e.target.value)}
                   className="w-full rounded-xl border border-slate-300 px-3.5 py-2.5 text-sm text-slate-900 font-mono focus:outline-none focus:ring-2 focus:ring-emerald-500"
@@ -200,6 +202,7 @@ export default function ProjectWorkspace({
               </label>
               <textarea
                 rows={3}
+                maxLength={500}
                 value={purpose}
                 onChange={(e) => setPurpose(e.target.value)}
                 className="w-full rounded-xl border border-slate-300 px-3.5 py-2.5 text-sm text-slate-900 focus:outline-none focus:ring-2 focus:ring-emerald-500"
@@ -227,14 +230,14 @@ export default function ProjectWorkspace({
                   onClick={() => setAmountVnd(2000000)}
                   className="text-[11px] font-semibold bg-slate-800 hover:bg-slate-700 text-white px-2.5 py-1 rounded-lg border border-slate-700 transition"
                 >
-                  Set 2,000,000 ₫
+                  Test invalid allocation (rejected)
                 </button>
                 <button
                   type="button"
-                  onClick={() => setAmountVnd(20000000)}
+                  onClick={() => setAmountVnd(campaign.milestones.find(m => m.id === selectedMilestoneId)!.budgetVnd)}
                   className="text-[11px] font-semibold bg-slate-800 hover:bg-slate-700 text-white px-2.5 py-1 rounded-lg border border-slate-700 transition"
                 >
-                  Edit to 20,000,000 ₫ (Resets Approvals)
+                  Restore milestone allocation
                 </button>
                 <button
                   type="button"
@@ -282,10 +285,10 @@ export default function ProjectWorkspace({
               Module 2 • Submit Evidence
             </span>
             <h2 className="text-lg font-extrabold text-slate-900 mt-2.5">
-              Upload Post-Disbursement Completion Proof
+              Submit Post-Disbursement Evidence
             </h2>
             <p className="text-xs text-slate-500 mt-1">
-              After Mock Payment is completed, submit invoices and handover documents so the
+              After Mock Payment is completed, submit a description and optional document URL so the
               Independent Auditor can verify and unlock the next milestone (Policy{' '}
               <strong>R10</strong>).
             </p>
@@ -315,6 +318,7 @@ export default function ProjectWorkspace({
               </label>
               <input
                 type="text"
+                maxLength={100}
                 value={invoiceCode}
                 onChange={(e) => setInvoiceCode(e.target.value)}
                 className="w-full rounded-xl border border-slate-300 px-3.5 py-2.5 text-sm text-slate-900 font-mono focus:outline-none focus:ring-2 focus:ring-teal-500"
@@ -327,6 +331,7 @@ export default function ProjectWorkspace({
               </label>
               <textarea
                 rows={3}
+                maxLength={1000}
                 value={evidenceDesc}
                 onChange={(e) => setEvidenceDesc(e.target.value)}
                 className="w-full rounded-xl border border-slate-300 px-3.5 py-2.5 text-sm text-slate-900 focus:outline-none focus:ring-2 focus:ring-teal-500"
@@ -339,6 +344,7 @@ export default function ProjectWorkspace({
               </label>
               <input
                 type="url"
+                maxLength={500}
                 value={fileUrl}
                 onChange={(e) => setFileUrl(e.target.value)}
                 className="w-full rounded-xl border border-slate-300 px-3.5 py-2.5 text-sm text-slate-900 font-mono focus:outline-none focus:ring-2 focus:ring-teal-500"
@@ -357,7 +363,7 @@ export default function ProjectWorkspace({
               className="w-full inline-flex items-center justify-center gap-2 bg-teal-600 hover:bg-teal-500 disabled:opacity-50 text-white font-bold text-sm py-3.5 px-5 rounded-2xl shadow-md transition"
             >
               <FileUp className="w-4 h-4" />
-              <span>Upload Evidence for Independent Auditor Review</span>
+              <span>Submit Evidence for Independent Auditor Review</span>
             </button>
 
             {/* Evidence Tracker List */}

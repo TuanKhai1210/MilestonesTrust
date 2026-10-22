@@ -23,6 +23,10 @@ interface NavbarProps {
   availableIdentities: AuthenticatedUser[];
   onResetDemo: () => void;
   pendingApprovalsCount: number;
+  authMode: 'demo' | 'tidecloak';
+  authConfigured: boolean;
+  onSignIn?: () => void;
+  onSignOut?: () => void;
 }
 
 export default function Navbar({
@@ -34,6 +38,7 @@ export default function Navbar({
   availableIdentities,
   onResetDemo,
   pendingApprovalsCount,
+  authMode, authConfigured, onSignIn, onSignOut,
 }: NavbarProps) {
   const navItems = [
     { id: 'dashboard', label: 'Public Dashboard', step: '01', icon: LayoutDashboard },
@@ -43,7 +48,7 @@ export default function Navbar({
       label: 'Approval Center',
       step: '03',
       icon: CheckCircle2,
-      badge: `${pendingApprovalsCount}/2 Quorum`,
+      badge: `${pendingApprovalsCount} pending`,
     },
     { id: 'security', label: 'TideCloak & QEA', step: '04', icon: Lock },
     { id: 'audit', label: 'Public Audit Trail', step: '05', icon: History },
@@ -96,12 +101,12 @@ export default function Navbar({
             <div className="flex items-center gap-1.5 pl-2 text-xs text-slate-400">
               <Fingerprint className="w-4 h-4 text-emerald-400 shrink-0" />
               <span className="font-semibold text-slate-300 hidden sm:inline">
-                TideCloak Identity:
+                {authMode === 'demo' ? 'Simulated identity:' : 'Participant:'}
               </span>
             </div>
 
-            <select
-              aria-label="Switch Active TideCloak Role Identity"
+            {authMode === 'demo' ? <select
+              aria-label="Demo identity"
               value={selectedActorKey}
               onChange={(e) => onSelectActor(e.target.value)}
               className="bg-slate-950 hover:bg-slate-900 text-white text-xs font-semibold rounded-xl px-3 py-2 border border-slate-700/80 focus:outline-none focus:ring-2 focus:ring-emerald-500 transition cursor-pointer"
@@ -111,7 +116,7 @@ export default function Navbar({
                   {id.displayName} • [{id.roles.join(', ')}]
                 </option>
               ))}
-            </select>
+            </select> : currentUser.sub ? <button onClick={onSignOut} className="px-3 py-2 text-xs">{currentUser.displayName} · Sign out</button> : <button disabled={!authConfigured} onClick={onSignIn} className="px-3 py-2 text-xs disabled:opacity-50">Sign in with TideCloak</button>}
 
             <div className="hidden xl:flex items-center gap-1.5">
               {currentUser.roles.map((role) => (
@@ -131,11 +136,11 @@ export default function Navbar({
 
             <button
               onClick={onResetDemo}
-              title="Reset campaign state for clean 2-minute video recording"
+              title="Refresh workspace from server"
               className="inline-flex items-center gap-1.5 text-xs font-semibold text-slate-300 hover:text-white bg-slate-800 hover:bg-slate-700 border border-slate-700 px-3 py-1.5 rounded-xl transition"
             >
               <RotateCcw className="w-3.5 h-3.5 text-emerald-400" />
-              <span>Reset Demo</span>
+              <span>Refresh workspace</span>
             </button>
           </div>
         </div>

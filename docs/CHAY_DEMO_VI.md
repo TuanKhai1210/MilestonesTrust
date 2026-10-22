@@ -16,18 +16,18 @@ Máy đã có `node_modules` thì không cần chạy lại `npm ci` mỗi lần
 
 `demo:fresh` tạo database mới có tên riêng trong `data/`, không xóa lần luyện trước hoặc database Tide. `npm run demo` dùng lại `data/demo.sqlite`. Database của các lần fresh vẫn được giữ trong `data/`; chạy fresh lần nữa là một phiên mới từ M1.
 
-Góc trên phải phải có **DEMO IDENTITY** và bộ chọn bốn vai trò. Trang có banner nói rõ danh tính mô phỏng. Nếu thấy nút Sign in with TideCloak thì bạn đang chạy chế độ live, hãy dừng app và dùng đúng lệnh demo ở trên.
+Góc trên phải phải có **Simulated identity:** và bộ chọn bốn vai trò. Trang có banner **LOCAL DEMO** nói rõ danh tính mô phỏng. Nếu thấy nút Sign in with TideCloak thì bạn đang chạy chế độ live, hãy dừng app và dùng đúng lệnh demo ở trên. **Refresh workspace** chỉ tải lại dữ liệu server; muốn phiên sạch thì dừng app và dùng `demo:fresh`.
 
 ## 2. Thực hiện một vòng M1 → M2
 
 | Bước | Chọn vai trò / thao tác | Kết quả phải thấy |
 |---|---|---|
-| 1 | Project team → chọn Pilot deployment (M1), điền recipient/purpose, bấm **Request funding** | Request mới với số tiền cố định 20,000,000 VND; chờ hai approvals |
-| 2 | Sponsor → đọc nội dung, bấm **Approve** ở dòng Sponsor | 1 of 2 independent approvals; chưa thể release |
-| 3 | Independent auditor → đọc cùng request/version, bấm **Approve** ở dòng Auditor | Đủ 2 approvals, mốc Ready to release |
-| 4 | Sponsor → **Release simulated funds** | Released to the project = 20,000,000; có payment mô phỏng |
-| 5 | Project team → Delivery evidence, nhập mô tả synthetic, bấm **Submit evidence** | Nội dung minh chứng hiện ra để Auditor đọc |
-| 6 | Independent auditor → **Verify delivery and unlock next stage** | M1 Verified; M2 Open for funding; tiền đã chi vẫn 20,000,000 |
+| 1 | Project team → tab **Project Workspace** → M1, điền recipient/purpose, bấm **Submit New Disbursement Request** | Request mới với số tiền cố định 20,000,000 VND; chờ hai approvals |
+| 2 | Sponsor → tab **Approval Center** → đọc nội dung, bấm **Duyệt (Sponsor)** | 1 / 2 Approvals; chưa thể chi |
+| 3 | Independent auditor → đọc cùng request/version, bấm **Duyệt (Auditor)** | Đủ 2 approvals |
+| 4 | Sponsor → **Thực thi lệnh chi (Mock)** | Dashboard tổng chi 20,000,000; có payment mô phỏng |
+| 5 | Project team → tab **Project Workspace** → chọn M1 ở phần evidence, nhập mô tả synthetic rồi submit | Nội dung minh chứng được lưu server |
+| 6 | Independent auditor → tab **Approval Center** → **Xác thực & Mở khóa giai đoạn tiếp** | M1 VERIFIED; M2 ELIGIBLE; tiền đã chi vẫn 20,000,000 |
 
 Minh chứng mẫu: `Synthetic demo: 10 filters delivered and installed; reviewed against the prepared delivery note.` Đây là câu giả lập để luyện, không phải minh chứng giao hàng thật.
 
@@ -36,7 +36,7 @@ M2 mở nghĩa là được tạo yêu cầu 30 triệu mới. Vẫn phải có 
 ## 3. Luyện các tình huống bị chặn
 
 - **Chỉ một approval:** sau bước Sponsor duyệt, release phải còn khóa. API cũng phải từ chối, không chỉ UI.
-- **Sửa nội dung sau khi duyệt:** trước khi release, chuyển Project team → **Revise request and clear approvals**, đổi recipient/purpose → **Save new version**. Version tăng, cả hai approvals bị xóa; phải đọc/duyệt lại.
+- **Sửa nội dung sau khi duyệt:** trước khi chi, chuyển Project team → **Project Workspace**, chọn đúng mốc, đổi recipient/purpose → **Update Request & Recompute Hash (Resets Approvals)**. Version tăng, cả hai approvals bị xóa; phải đọc/duyệt lại. Số tiền phải bằng phân bổ cố định của mốc.
 - **Platform admin:** vai trò này không có quyền duyệt chi hoặc xác minh giao hàng chỉ vì là admin. Các thao tác sai quyền bị API trả 403 trong kiểm thử.
 - **Chi lặp:** API retry sau khi đã trả tiền không tạo payment thứ hai. Bộ test kiểm điều này; UI sau khi trả xong không có nút tạo thêm payment cho cùng request.
 - **Thiếu minh chứng:** Auditor chưa được verify khi Team chưa submit evidence.
@@ -49,7 +49,7 @@ npm run build
 npm run doctor
 ```
 
-`check` hiện có 20 tests: nghiệp vụ, API route handlers và token ký bằng khóa ES256 tạo riêng cho test. API test hoàn tất cả ba mốc trên database tạm và kiểm các yêu cầu sai origin/content type/JSON/quyền. Các test không dùng tài khoản Tide hay gọi realm thật. Log từ chối chữ ký/exp/issuer trong test âm tính là kết quả mong đợi; kết luận theo số pass/fail cuối.
+`check` hiện có 24 tests: nghiệp vụ, API route handlers, frontend và token ký bằng khóa ES256 tạo riêng cho test. Frontend tests kiểm dữ liệu persist, lỗi API không bị đổi thành thành công giả, public roles và việc ẩn bộ chọn demo trong live UI. API test hoàn tất cả ba mốc trên database tạm và kiểm các yêu cầu sai origin/content type/JSON/quyền. Các test không dùng tài khoản Tide hay gọi realm thật. Log từ chối chữ ký/exp/issuer trong test âm tính là kết quả mong đợi; kết luận theo số pass/fail cuối.
 
 `doctor` kiểm Node, Docker CLI/engine và việc có adapter; adapter hiện diện chưa chứng minh login/QEA thành công. `build` kiểm bản production; demo identities bị cấm trong production nên dùng lệnh demo để luyện UI.
 
