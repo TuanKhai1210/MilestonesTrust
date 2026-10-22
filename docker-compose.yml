@@ -1,6 +1,21 @@
 services:
+  tidecloak-data-init:
+    image: tideorg/tidecloak-dev@sha256:3f52d0bc3e4e3ae5153e172960003bbe94705cd40af6561fd4c7c4434aaa2708
+    user: "0:0"
+    entrypoint: ["/bin/sh", "-ec"]
+    command: ["chown -R 1000:0 /data && chmod u+rwx /data"]
+    network_mode: none
+    read_only: true
+    cap_drop: [ALL]
+    cap_add: [CHOWN, FOWNER]
+    security_opt: ["no-new-privileges:true"]
+    volumes:
+      - tidecloak-data:/data
   tidecloak:
-    image: tideorg/tidecloak-dev:latest
+    image: tideorg/tidecloak-dev@sha256:3f52d0bc3e4e3ae5153e172960003bbe94705cd40af6561fd4c7c4434aaa2708
+    depends_on:
+      tidecloak-data-init:
+        condition: service_completed_successfully
     ports:
       - "127.0.0.1:8080:8080"
     environment:

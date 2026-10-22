@@ -37,10 +37,15 @@ export async function authenticate(request: Request): Promise<Actor> {
   let payload;
   try { payload = await verifyTideCloakToken(config, token, []); }
   catch { throw new RuleError('Token verification failed.', 401); }
-  if (!payload || !payload.sub) throw new RuleError('Invalid or expired TideCloak token.', 401);
+  if (!payload || typeof payload.sub !== 'string' || !payload.sub.trim()) throw new RuleError('Invalid or expired TideCloak token.', 401);
   const claims = payload as Record<string, any>;
   const issuer = `${config['auth-server-url'].replace(/\/$/, '')}/realms/${config.realm}`;
   if (claims.iss !== issuer || claims.azp !== config.resource) throw new RuleError('Token was not issued for this realm and application.', 401);
-  const roles = [...(claims.realm_access?.roles || []), ...(claims.resource_access?.[config.resource]?.roles || [])].filter((r: Role) => ROLES.includes(r));
-  return { sub: String(claims.sub), name: String(claims.preferred_username || 'Participant'), roles };
+  function tokenRoles(value: unknown): Role[] {
+    if (value === undefined) return [];
+    if (!Array.isArray(value) || value.some(role => typeof role !== 'string')) throw new RuleError('Invalid role claims.', 401);
+    return value.filter((role): role is Role => ROLES.includes(role as Role));
+  }
+  const roles = [...new Set([...tokenRoles(claims.realm_access?.roles), ...tokenRoles(claims.resource_access?.[config.resource]?.roles)])];
+  return { sub: claims.sub, name: typeof claims.preferred_username === 'string' ? claims.preferred_username : 'Participant', roles };
 }

@@ -4,6 +4,8 @@ This guide is the remaining live integration work. Local demo success is not a l
 
 ## 1. Start or obtain a TideCloak server
 
+If Docker installation is blocked by a disabled VirtualMachinePlatform feature or a WSL registration error, follow [the Windows setup steps](WINDOWS_SETUP_VI.md) first. These prerequisites have now passed on the development machine; the remaining blocker is the Tide Console bootstrap sign-in. See [the verification snapshot](VERIFICATION.md) for the latest observed state.
+
 If Docker Desktop is installed and running, from PowerShell:
 
 ```powershell
@@ -12,6 +14,10 @@ docker compose up -d
 ```
 
 The compose file binds port 8080 to `127.0.0.1`. The password stays in your process environment, not in the repository. Open `http://localhost:8080`.
+
+The compose file pins the tested image digest. A network-isolated, read-only one-shot init container sets ownership of the named H2 volume for UID 1000; the Tide server then runs as that non-root user. This fixes the access-denied failure observed with a fresh root-owned named volume.
+
+On this development machine a random bootstrap password was already saved in the gitignored `data/.env.tidecloak.local`. Reuse it with `docker compose --env-file data/.env.tidecloak.local up -d`. Do not replace it with a different password and assume an initialized database's administrator password has changed. Never commit or record that local file. Open a new terminal after installing Docker so the Docker CLI and credential helper are both on PATH.
 
 An image is not a configured Tide realm. Follow the official [Quickstart](https://docs.tide.org/get-started/Tidecloak%20Quickstart) to provision a realm/client, activate the dev license and enroll the first administrator. You can run the initializer in a **separate temporary project** and copy the public adapter export to this project's `config/tidecloak.json`; do not run an initializer over this existing source tree.
 
