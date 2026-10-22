@@ -1,0 +1,12 @@
+node_modules/
+.next/
+.env*
+!.env.example
+config/tidecloak.json
+config/*.local.json
+data/
+coverage/
+*.tsbuildinfo
+*.log
+.DS_Store
+test-results/
