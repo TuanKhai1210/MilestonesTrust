@@ -199,7 +199,7 @@ export default function ApprovalCenter({
 
                       {sponsorApproval ? (
                         <div className="text-[11px] text-zinc-400 font-mono mt-4 space-y-1.5 bg-black/40 p-3 rounded-xl border border-emerald-900/30">
-                          <div className="flex justify-between"><span className="text-zinc-500">Signer:</span> <span className="text-zinc-200">{sponsorApproval.approverName}</span></div>
+                          <div className="flex justify-between"><span className="text-zinc-500">Approver:</span> <span className="text-zinc-200">{sponsorApproval.approverName}</span></div>
                           <div className="flex justify-between"><span className="text-zinc-500">Sub:</span> <span className="text-zinc-300">{sponsorApproval.approverSub}</span></div>
                         </div>
                       ) : (
@@ -248,7 +248,7 @@ export default function ApprovalCenter({
 
                       {auditorApproval ? (
                         <div className="text-[11px] text-zinc-400 font-mono mt-4 space-y-1.5 bg-black/40 p-3 rounded-xl border border-teal-900/30">
-                          <div className="flex justify-between"><span className="text-zinc-500">Signer:</span> <span className="text-zinc-200">{auditorApproval.approverName}</span></div>
+                          <div className="flex justify-between"><span className="text-zinc-500">Approver:</span> <span className="text-zinc-200">{auditorApproval.approverName}</span></div>
                           <div className="flex justify-between"><span className="text-zinc-500">Sub:</span> <span className="text-zinc-300">{auditorApproval.approverSub}</span></div>
                         </div>
                       ) : (

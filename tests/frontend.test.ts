@@ -72,6 +72,8 @@ test('live UI does not expose demo account switching or abuse simulation', () =>
   assert.doesNotMatch(navbar('tidecloak'), /<select|Reset Demo/);
   assert.match(navbar('tidecloak'), /Sign in with TideCloak/);
   assert.match(navbar('demo'), /aria-label="Demo identity"/);
+  assert.match(navbar('demo'), /Simulate sign-in/);
+  assert.doesNotMatch(navbar('demo'), /Sign out \(demo\)/);
   const s = createStore();
   try {
     s.act(team, { action: 'request', milestoneId: 'M1', amount: 20000000, recipient: 'Supplier', purpose: 'Filters' });

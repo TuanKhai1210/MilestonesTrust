@@ -25,6 +25,7 @@ interface NavbarProps {
   pendingApprovalsCount: number;
   authMode: 'demo' | 'tidecloak';
   authConfigured: boolean;
+  sessionBusy?: boolean;
   onSignIn?: () => void;
   onSignOut?: () => void;
 }
@@ -38,7 +39,7 @@ export default function Navbar({
   availableIdentities,
   onResetDemo,
   pendingApprovalsCount,
-  authMode, authConfigured, onSignIn, onSignOut,
+  authMode, authConfigured, onSignIn, onSignOut, sessionBusy,
 }: NavbarProps) {
   const navItems = [
     { id: 'dashboard', label: 'Public Dashboard', step: '01', icon: LayoutDashboard },
@@ -105,9 +106,10 @@ export default function Navbar({
               </span>
             </div>
 
-            {authMode === 'demo' ? <select
+            {authMode === 'demo' ? <><select
               aria-label="Demo identity"
               value={selectedActorKey}
+              disabled={sessionBusy || Boolean(currentUser.sub)}
               onChange={(e) => onSelectActor(e.target.value)}
               className="bg-slate-950 hover:bg-slate-900 text-white text-xs font-semibold rounded-xl px-3 py-2 border border-slate-700/80 focus:outline-none focus:ring-2 focus:ring-emerald-500 transition cursor-pointer"
             >
@@ -116,7 +118,7 @@ export default function Navbar({
                   {id.displayName} • [{id.roles.join(', ')}]
                 </option>
               ))}
-            </select> : currentUser.sub ? <button onClick={onSignOut} className="px-3 py-2 text-xs">{currentUser.displayName} · Sign out</button> : <button disabled={!authConfigured} onClick={onSignIn} className="px-3 py-2 text-xs disabled:opacity-50">Sign in with TideCloak</button>}
+            </select><button disabled={sessionBusy} onClick={currentUser.sub ? onSignOut : onSignIn} className="px-3 py-2 text-xs rounded-lg border border-emerald-700 disabled:opacity-50">{sessionBusy ? 'Please wait…' : currentUser.sub ? 'Sign out (demo)' : 'Simulate sign-in'}</button></> : currentUser.sub ? <button onClick={onSignOut} className="px-3 py-2 text-xs">{currentUser.displayName} · Sign out</button> : <button disabled={!authConfigured} onClick={onSignIn} className="px-3 py-2 text-xs disabled:opacity-50">Sign in with TideCloak</button>}
 
             <div className="hidden xl:flex items-center gap-1.5">
               {currentUser.roles.map((role) => (

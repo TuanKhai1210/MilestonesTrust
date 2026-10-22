@@ -63,9 +63,12 @@ export function campaignView(state: Snapshot): CampaignState {
   };
 }
 
+export class BackendError extends Error {
+  constructor(message: string, public status: number) { super(message); }
+}
 export async function backendJson<T>(response: Response): Promise<T> {
   let result;
   try { result = await response.json(); } catch { throw new Error(`Backend returned HTTP ${response.status} without JSON. No local fallback was applied.`); }
-  if (!response.ok) throw new Error(typeof result?.error === 'string' ? result.error : `Backend returned HTTP ${response.status}.`);
+  if (!response.ok) throw new BackendError(typeof result?.error === 'string' ? result.error : `Backend returned HTTP ${response.status}.`, response.status);
   return result as T;
 }

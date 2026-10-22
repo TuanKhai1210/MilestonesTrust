@@ -29,8 +29,7 @@ export default function AuditTrail({ events }: AuditTrailProps) {
                 Public Transparency & Audit Trail
               </h2>
               <p className="text-xs text-slate-500">
-                Chronological record of all requests, approvals, payments, and blocked policy
-                violations
+                Recent recorded requests, approvals, payments and milestone events
               </p>
             </div>
           </div>
@@ -61,9 +60,9 @@ export default function AuditTrail({ events }: AuditTrailProps) {
           <Info className="w-4 h-4 text-sky-600 shrink-0 mt-0.5" />
           <div className="leading-relaxed">
             <strong>Transparency Boundary Note:</strong> Application audit logs provide
-            public visibility into funding requests, approvals, and blocked abuse attempts
-            in this MVP. Unlike TideCloak QEA role governance, application database logs are
-            not claimed to be a cryptographically immutable ledger.
+            public visibility into successful workflow events in this MVP. Denied actions
+            return errors and are not automatically persisted here. Application database
+            logs are not a cryptographically immutable ledger.
           </div>
         </div>
 
