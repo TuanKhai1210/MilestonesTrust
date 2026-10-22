@@ -1,4 +1,12 @@
 import {spawn} from 'node:child_process';
-const child=spawn(process.execPath,['node_modules/next/dist/bin/next','dev','--hostname','127.0.0.1'],{stdio:'inherit',env:{...process.env,AUTH_MODE:'demo',DATABASE_PATH:'./data/demo.sqlite'}});
+import {randomUUID} from 'node:crypto';
+const args = process.argv.slice(2);
+if (args.some(arg => arg !== '--fresh')) throw new Error('Supported option: --fresh');
+const database = args.includes('--fresh') ? `./data/demo-${Date.now()}-${randomUUID().slice(0,8)}.sqlite` : './data/demo.sqlite';
+console.log('LOCAL DEMO: simulated identities and payments. Live Tide login/QEA is not connected.');
+console.log('Demo database:', database);
+const child=spawn(process.execPath,['node_modules/next/dist/bin/next','dev','--hostname','127.0.0.1'],{stdio:'inherit',env:{...process.env,AUTH_MODE:'demo',DATABASE_PATH:database}});
+child.on('error',error=>{console.error(error.message);process.exitCode=1;});
 child.on('exit',code=>process.exit(code??1));
 process.on('SIGINT',()=>child.kill('SIGINT'));
+process.on('SIGTERM',()=>child.kill('SIGTERM'));

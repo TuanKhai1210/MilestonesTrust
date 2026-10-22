@@ -31,6 +31,8 @@ npm run demo
 
 Open **http://localhost:3000**. Select Project team, Sponsor, Independent auditor or Platform admin in the top bar. Demo mode binds to loopback and is refused in production. It must not be presented as real authentication or QEA.
 
+For a clean rehearsal, stop the app and run `npm run demo:fresh`. This creates a separate database and preserves previous runs. A [Vietnamese walkthrough](docs/CHAY_DEMO_VI.md) includes exact buttons, expected results and failure cases.
+
 1. Team: request milestone 1 funding.
 2. Sponsor: approve. Release remains locked.
 3. Auditor: approve the same request.
@@ -58,7 +60,7 @@ npm run build
 npm run doctor
 ```
 
-The tests cover role and membership checks, self-approval, duplicate subjects, version changes, stale approvals, milestone sequencing, payment idempotency, malformed amounts and fail-closed authentication modes. They use synthetic actors, not a live Tide realm.
+The 20 tests cover role and membership checks, self-approval, duplicate subjects, edits, stale approvals, payment idempotency and API input/origin validation through all three milestones. Signed ES256 fixtures exercise the official verifier against tampering, wrong keys, expired/not-yet-valid tokens, wrong issuer/client and malformed claims. These fixtures use generated local keys, not a live Tide realm.
 
 ## Architecture and limits
 

@@ -1,8 +1,12 @@
 # Thiết lập Windows trước khi nối TideCloak
 
+**Cập nhật sau restart ngày 22/10:** WSL 2.7.8 trả version/status bình thường, WSLService chạy và Windows không còn pending reboot. Docker Desktop 4.96.1 đã cài thành công, Engine 29.9.2 và Compose 5.6.0 hoạt động. Không chạy lại bước Administrator bên dưới chỉ vì Tide Console lỗi; xem trạng thái riêng ở [VERIFICATION.md](VERIFICATION.md).
+
+## Trạng thái ban đầu trước khi sửa
+
 Đã kiểm tra trên máy phát triển ngày 22/10/2026: Windows 11 Home, khoảng 16 GB RAM, Node.js 24.18.0. Gói WSL Store 2.7.8 có mặt nhưng `wsl --status` báo `Wsl/CallMsi/Install/REGDB_E_CLASSNOTREG`; chưa có WslService hoặc `C:\Program Files\WSL\wsl.exe`. Docker Desktop từ chối cài vì **VirtualMachinePlatform chưa bật**. Không diễn giải giá trị WMI VirtualizationFirmwareEnabled=false là bằng chứng BIOS tắt khi hypervisor đã hiện diện.
 
-## Bước đang cần người dùng làm
+## Các bước sửa khi gặp đúng lỗi prerequisite trên
 
 Lưu các notebook/tài liệu đang làm trước. Mở **PowerShell → Run as administrator** và chạy:
 
