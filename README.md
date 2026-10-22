@@ -10,7 +10,7 @@ Milestone-based community funding with independent spending approvals and a Tide
 [![GitHub Pages](https://github.com/TuanKhai1210/MilestonesTrust/actions/workflows/pages.yml/badge.svg?branch=main)](https://github.com/TuanKhai1210/MilestonesTrust/actions/workflows/pages.yml)
 [![License: MIT](https://img.shields.io/badge/License-MIT-173f35.svg)](LICENSE)
 
-[**Explore the project →**](https://tuankhai1210.github.io/MilestonesTrust/) · [Run the application](docs/SETUP.md) · [TideCloak setup](docs/TIDECLOAK_SETUP.md)
+[**Explore the project →**](https://tuankhai1210.github.io/MilestonesTrust/) · [Watch the demo](demo/RMIT_SGS_AstraHunter_C2.mp4) · [Run the application](docs/SETUP.md) · [TideCloak setup](docs/TIDECLOAK_SETUP.md)
 
 RMIT Hackathon 2026 · Challenge 2: Tide UNLOCKED
 
@@ -85,7 +85,7 @@ The 27 application tests cover authorization, campaign membership, independent r
 
 The working demo uses synthetic identities, evidence and funds. No real bank transfer occurs. TideCloak integration code is present; live application login, QEA and complete DPoP verification still need validation. QEA governs protected identity changes, not mock payment records. The backend and SQLite remain trusted, and the application audit log is not immutable.
 
-The two-minute submission recording is **not included yet**; see [demo requirements](demo/README.md). Repository publication and website deployment do not submit the challenge.
+The [team's demo recording](demo/RMIT_SGS_AstraHunter_C2.mp4) is included in the repository (1 minute 44 seconds, 1080p). See [recording details](demo/README.md). Repository publication and website deployment do not submit the challenge.
 
 ## Documentation
 
